@@ -131,3 +131,6 @@ the end.
 - 2026-11-27: The feet looked like balloons (user): each was one 6 cm ball with beads for toes. Now a sculpted foot
   (ankle, heel, flat sole, wider ball of the foot, big toe on the inside, about 7 cm by 4 cm) built from a
   `FOOT_SHAPE` table. Looks only: the physics ball and the grips are unchanged.
+- 2026-11-27: The logo is now the user's own (user): decoded from their Silhouette Studio file (BabyTossCup.studio3:
+  outlines with curve handles, each piece's scale and position applied), without the B, so the bin is solid like
+  the earlier tracing. Used on the home screen, the tall can and the website's Baby Toss card.
