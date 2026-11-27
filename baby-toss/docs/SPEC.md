@@ -72,8 +72,10 @@ is the written version.
   "SPLAT!" on the real can is left off. (Claude's call: the font is Fraunces at its heaviest and softest, the
   closest free match to the can's lettering; the logo is Claude's tracing of the one on the can)
 - **The throne** (user, 2026-11-27, from a photo of the user's own): it stands just off to the left of the cans,
-  in front of the fence, empty. A heap of stone skulls, a red satin seat and tufted back in an arched wooden frame
-  with a spire, torn dark red drapes, and clawed, horned hands gripping the top corners. Babies bounce off it like a
+  in front of the fence, empty. Matched to the user's photos: a giant sculpted skull as the base with little skulls
+  on its left, a red satin box cushion, a flat plywood board with an arched top holding a padded satin arch and a
+  coffin-shaped tufted panel with six buttons, a spike at the top right, black and dark red drapes behind, and
+  monster arms spreading outward with talons hooked over the board's top corners. Babies bounce off it like a
   solid box. (Claude's call: built from simple shapes, its place and size)
 - The back bucket is meant to be partly hidden: about a third of it is behind the tall can from the throwing spot.
 - The cans wobble a little when hit but never tip over. (user, 2026-11-27; may be revisited) In the game only the

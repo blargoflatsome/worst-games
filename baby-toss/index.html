@@ -398,8 +398,9 @@ function rockCans(dt){for(const c of CANS){for(const i of [0,1]){c.wv[i]+=(-196*
 CANS.forEach(buildCan);
 
 /* ---------- the throne ----------
-   The user's throne, empty, just left of the cans (SPEC §4): stone skulls, a tufted red satin seat and back in a
-   pointed wooden arch with a spire, folded torn drapes, and monster arms whose talons hook over the top corners.
+   The user's throne, empty, just left of the cans (SPEC §4), from their photos: a giant sculpted skull with little
+   skulls on its left, a red satin cushion, a flat plywood board with an arched top holding a tufted coffin of satin,
+   black and dark red drapes, and monster arms whose talons hook over the board's top corners.
    A solid box stands in for it in the physics, so babies bounce off. */
 const THRONE={x:-1.7,z:-8.1,turn:.21};
 const blotch=(base,spots,n=1400,size=[1,5])=>tex(256,256,(g,w,h)=>{g.fillStyle=base;g.fillRect(0,0,w,h);for(let i=0;i<n;i++){const x=Math.random()*w,y=Math.random()*h,r=rand(...size);g.fillStyle=R(spots);g.globalAlpha=rand(.08,.3);g.beginPath();g.arc(x,y,r,0,7);g.fill()}g.globalAlpha=1});
@@ -415,65 +416,75 @@ function taperTube(pts,r0,r1,lump=0,seg=24,rad=10){const curve=new THREE.Catmull
 // a padded shape: an outline pushed out with deep rounded edges
 const padded=(shape,depth,r)=>new THREE.ExtrudeGeometry(shape,{depth,bevelEnabled:true,bevelThickness:r,bevelSize:r,bevelSegments:6,curveSegments:24});
 function rrect(w,h,r){const s=new THREE.Shape();s.moveTo(-w/2+r,-h/2);s.lineTo(w/2-r,-h/2);s.quadraticCurveTo(w/2,-h/2,w/2,-h/2+r);s.lineTo(w/2,h/2-r);s.quadraticCurveTo(w/2,h/2,w/2-r,h/2);s.lineTo(-w/2+r,h/2);s.quadraticCurveTo(-w/2,h/2,-w/2,h/2-r);s.lineTo(-w/2,-h/2+r);s.quadraticCurveTo(-w/2,-h/2,-w/2+r,-h/2);return s}
-function gothic(w,hs,ha){const s=new THREE.Shape(),r=w*.95;s.moveTo(-w/2,0);s.lineTo(w/2,0);s.lineTo(w/2,hs);s.absarc(w/2-r,hs,r,0,Math.acos((r-w/2)/r),false);s.absarc(-w/2+r,hs,r,Math.PI-Math.acos((r-w/2)/r),Math.PI,false);s.lineTo(-w/2,0);return s}
+function headboard(w,h,aw){const s=new THREE.Shape(),r=aw/2,top=h+.06;s.moveTo(-w/2,0);s.lineTo(w/2,0);s.lineTo(w/2,h);s.quadraticCurveTo(w/2,top,r+.03,top);s.absarc(0,top,r,0,Math.PI,false);s.quadraticCurveTo(-w/2,top,-w/2,h);s.lineTo(-w/2,0);return s}
 function throne(){
   const T=new THREE.Group(),put=(geo,mat,x,y,z,o={})=>{const m=new THREE.Mesh(geo,mat);m.position.set(x,y,z);if(o.r)m.rotation.set(...o.r);if(o.s)m.scale.set(...o.s);m.castShadow=m.receiveShadow=true;(o.to||T).add(m);return m};
   // materials
-  const stone=new THREE.MeshStandardMaterial({map:tiled(blotch('#4b4b4f',['#1c1c1e','#2e2e32','#77777b','#141416'],2600,[1,4]),3,3),roughness:.95});
-  const hole=new THREE.MeshBasicMaterial({color:0x080808}); // unlit, so sockets read as holes
-  const crease=tiled(tex(128,128,(g,w,h)=>{g.fillStyle='#808080';g.fillRect(0,0,w,h); // diamond tufting: puffs between buttons, dimples at them
-    const pts=[[0,0],[w,0],[0,h],[w,h],[w/2,h/2]];for(let y=0;y<h;y+=2)for(let x=0;x<w;x+=2){const d=Math.min(...pts.map(([px,py])=>Math.hypot(px-x,(py-y)*w/h)));const v=Math.min(255,60+d*3.2);g.fillStyle=`rgb(${v},${v},${v})`;g.fillRect(x,y,2,2)}}),5.5,4.5);
+  const stone=new THREE.MeshStandardMaterial({map:tiled(blotch('#77777b',['#1c1c1e','#34343a','#9c9ca0','#141416'],2600,[1,5]),3,2),roughness:.9});
+  const socket=new THREE.MeshBasicMaterial({color:lin(0x0c0c0c)}); // unlit, so the holes stay dark
   const wrinkle=tiled(tex(128,128,(g,w,h)=>{g.fillStyle='#808080';g.fillRect(0,0,w,h);for(let i=0;i<40;i++){const x=Math.random()*w;const lg=g.createLinearGradient(x-6,0,x+6,0);lg.addColorStop(0,'rgba(0,0,0,0)');lg.addColorStop(.5,R(['rgba(255,255,255,.35)','rgba(0,0,0,.35)']));lg.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=lg;g.save();g.translate(x,h/2);g.rotate(rand(-.3,.3));g.fillRect(-6,-h,12,h*2);g.restore()}}),3,3);
-  const satin=o=>new THREE.MeshPhysicalMaterial(Object.assign({color:lin(0x8a0c1c),roughness:.32,clearcoat:.6,clearcoatRoughness:.25,sheen:lin(0xff5a6e)},o));
-  const ply=new THREE.MeshStandardMaterial({map:wood,color:lin(0xf3b783),roughness:.75});
-  const stain=new THREE.MeshStandardMaterial({map:wood,color:lin(0x8a5530),roughness:.6});
-  const flesh=new THREE.MeshStandardMaterial({map:tiled(blotch('#77706f',['#5a1212','#8c2020','#2c2626','#a69e9e','#6d1717'],1800,[1,6]),2,4),roughness:.8});
+  const satin=o=>new THREE.MeshPhysicalMaterial(Object.assign({color:lin(0x9a0b18),roughness:.3,clearcoat:.6,clearcoatRoughness:.25,sheen:lin(0x8a2030),bumpMap:wrinkle,bumpScale:.003},o));
+  const ply=new THREE.MeshStandardMaterial({map:wood,color:lin(0xe8a868),roughness:.75});
+  const flesh=new THREE.MeshStandardMaterial({map:tiled(blotch('#7d7677',['#5a1212','#8c2020','#262020','#b0a8a8','#6d1717'],2000,[1,7]),2,4),roughness:.7});
   const ivory=new THREE.MeshStandardMaterial({color:lin(0xefe6cf),roughness:.4});
 
-  // skulls: a domed cranium, brow, cheekbones, deep sockets, nasal cavity and upper teeth
-  function skull(sc,x,y,z,ry,rx=0){const k=new THREE.Group(),o={to:k};
-    put(lumpy(.3,.02),stone,0,.08,-.06,{...o,s:[.86,.92,1.1]});
-    put(new THREE.SphereGeometry(.22,32,20),stone,0,-.1,.08,{...o,s:[1,.72,.9]}); // face
-    put(new THREE.SphereGeometry(.05,24,16),stone,0,.06,.2,{...o,s:[3.2,.6,.8]}); // brow ridge
-    for(const e of [-1,1]){put(new THREE.SphereGeometry(.085,24,16),hole,e*.092,-.035,.2,{...o,s:[1,1,.7]});put(new THREE.SphereGeometry(.07,16,12),stone,e*.17,-.13,.15,{...o,s:[.8,.55,1]})} // sockets, cheekbones
-    const nose=put(new THREE.ConeGeometry(.045,.1,3),hole,0,-.15,.27,{...o,s:[1,1,.35]});nose.rotation.z=Math.PI;
-    put(new THREE.SphereGeometry(.13,24,16),stone,0,-.24,.14,{...o,s:[1,.45,.9]}); // upper jaw
-    for(let i=-3;i<=3;i++)put(new THREE.BoxGeometry(.026,.05,.022),ivory.clone(),i*.03,-.27,.255-Math.abs(i)*.016,o).material.color.set(lin(0x7a766e));
-    k.scale.setScalar(sc);k.position.set(x,y,z);k.rotation.set(rx,ry,0);T.add(k)}
-  put(lumpy(.55,.12),stone,0,.22,-.12,{s:[1.05,.5,.7]}); // rocky heap the skulls sit in
-  skull(1.25,0,.27,.2,0,-.05);skull(.9,-.5,.3,.02,.6);skull(.85,.52,.28,0,-.55);skull(.62,-.34,.13,.34,.35,.2);skull(.58,.36,.12,.36,-.3,.2);skull(.7,0,.3,-.32,0);
+  // the base: one giant sculpted skull, heavy brows over deep sockets, cheekbones, a nasal cavity and teeth
+  const S=new THREE.Group(),o={to:S};
+  put(lumpy(.5,.05),stone,0,.38,-.02,{...o,s:[1.14,.77,.8]});
+  for(const e of [-1,1]){
+    put(new THREE.SphereGeometry(1,28,18),socket,e*.21,.42,.29,{...o,s:[.15,.13,.11]});
+    put(lumpy(1,.15),stone,e*.22,.56,.3,{...o,s:[.22,.075,.12],r:[0,0,-e*.15]}); // brow
+    put(lumpy(1,.15),stone,e*.28,.26,.32,{...o,s:[.15,.08,.1],r:[0,0,e*.2]}); // cheekbone
+    put(lumpy(1,.2),stone,e*.46,.4,.18,{...o,s:[.09,.22,.12]}); // temple
+  }
+  put(new THREE.ConeGeometry(.08,.17,3),socket,0,.27,.36,{...o,s:[1,1,.5]});
+  put(lumpy(1,.15),stone,0,.11,.33,{...o,s:[.32,.08,.1]}); // upper jaw
+  for(let i=-3;i<=3;i++)put(new THREE.BoxGeometry(.05,.08,.03),stone,i*.06,.05,.38-Math.abs(i)*.012,o);
+  T.add(S);
+  // little skulls clustered on its left side and the cushion's corner
+  function skull(sc,x,y,z,ry){const k=new THREE.Group(),q={to:k};
+    put(lumpy(.3,.03),stone,0,.06,-.04,{...q,s:[.88,.9,1.08]});put(new THREE.SphereGeometry(.2,24,16),stone,0,-.1,.08,{...q,s:[1,.72,.9]});
+    for(const e of [-1,1])put(new THREE.SphereGeometry(.085,20,14),socket,e*.092,-.035,.2,{...q,s:[1,1,.7]});
+    put(new THREE.ConeGeometry(.04,.08,3),socket,0,-.15,.27,{...q,s:[1,1,.4],r:[0,0,Math.PI]});
+    k.scale.setScalar(sc);k.position.set(x,y,z);k.rotation.y=ry;T.add(k)}
+  skull(.46,-.58,.22,.14,.7);skull(.4,-.64,.52,0,.8);skull(.32,-.5,.08,.36,.5);skull(.28,-.6,.76,-.08,.9);skull(.17,-.44,.94,.22,.4);
 
-  // seat: a thick rolled cushion on a dark board
-  put(new THREE.BoxGeometry(1.0,.06,.66),stain,0,.6,0);
-  put(padded(rrect(.86,.52,.08),.04,.07),satin({bumpMap:wrinkle,bumpScale:.003}),0,.7,.27,{r:[-Math.PI/2,0,0]});
-  // back: pointed arch of plywood with a stained border, side posts and a spire
-  put(new THREE.ExtrudeGeometry(gothic(1.0,1.0,0),{depth:.04,bevelEnabled:false,curveSegments:24}),ply,0,.62,-.36);
-  {const ring=gothic(1.0,1.0,0);ring.holes.push(gothic(.86,.94,0).getPoints(48).reduce((p,v,i)=>(i?p.lineTo(v.x,v.y+.03):p.moveTo(v.x,v.y+.03),p),new THREE.Path()));put(new THREE.ExtrudeGeometry(ring,{depth:.06,bevelEnabled:true,bevelThickness:.01,bevelSize:.01,bevelSegments:2,curveSegments:24}),stain,0,.62,-.33)}
-  for(const sx of [-1,1])put(new THREE.BoxGeometry(.09,1.55,.14),stain,sx*.54,1.38,-.3);
-  const spire=[[0,0],[.05,0],[.05,.04],[.03,.06],[.045,.1],[.02,.16],[.012,.32],[0,.42]].map(([a,b])=>new THREE.Vector2(a,b));
-  put(new THREE.LatheGeometry(spire,16),stain,.46,2.15,-.3);
-  // tufted coffin-shaped back cushion with buttons, and a round head bolster
-  const coffin=new THREE.Shape();coffin.moveTo(-.2,0);coffin.lineTo(.2,0);coffin.lineTo(.31,.74);coffin.lineTo(.25,1.0);coffin.lineTo(-.25,1.0);coffin.lineTo(-.31,.74);coffin.lineTo(-.2,0);
-  put(padded(coffin,.03,.06),satin({bumpMap:crease,bumpScale:.012}),0,.78,-.3);
-  for(let j=0;j<5;j++)for(let i=-2;i<=2;i++){const bx=i*.182+(j%2?.091:0),by=.08+j*.222,half=.2+.11*Math.min(by/.74,1);if(Math.abs(bx)<half-.05&&by<.96)put(new THREE.SphereGeometry(.016,10,8),hole,bx,.78+by,-.205)}
-  put(new THREE.CylinderGeometry(.1,.1,.5,24),satin({bumpMap:wrinkle,bumpScale:.003}),0,1.85,-.25,{r:[0,0,Math.PI/2]});
-  // drapes: folded, torn at the bottom, a black layer behind the red
-  const rag=tex(128,256,(g,w,h)=>{g.fillStyle='#fff';g.beginPath();g.moveTo(0,0);g.lineTo(w,0);for(let x=w;x>=0;x-=6)g.lineTo(x,h*rand(.78,1));g.closePath();g.fill();for(let i=0;i<7;i++)g.clearRect(rand(0,w),rand(.35,.9)*h,rand(3,9),rand(10,30))});
-  const drape=(col,op)=>new THREE.MeshStandardMaterial({color:lin(col),alphaMap:rag,alphaTest:.5,side:THREE.DoubleSide,roughness:.65,transparent:op<1,opacity:op});
-  for(const [sx,layer] of [[-1,0],[1,0],[-1,1],[1,1]]){const geo=new THREE.PlaneGeometry(.5,1.85,24,30),p=geo.attributes.position;
-    for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),down=(.925-y)/1.85;p.setZ(i,Math.sin(x*32+layer)*(.012+.035*down)+Math.sin(x*9+y*2)*.02);p.setX(i,x*(1+.25*down))}
-    geo.computeVertexNormals();put(geo,layer?drape(0x0d0b0c,1):drape(0x5a1220,.93),sx*(.66+layer*.02),1.2,-.2-layer*.06,{r:[0,sx*.42,0]})}
-  // monster arms gripping the top corners, talons hooked over the front, a spike behind
-  for(const sx of [-1,1]){const A=new THREE.Group(),o={to:A};
-    put(taperTube([new THREE.Vector3(sx*.42,.12,-.45),new THREE.Vector3(sx*.18,.16,-.22),new THREE.Vector3(0,.1,.02),new THREE.Vector3(-sx*.04,.02,.16)],.15,.1,.22),flesh,0,0,0,o);
-    put(lumpy(.12,.2),flesh,-sx*.04,.0,.18,{...o,s:[1.2,.8,1]}); // knuckles
-    for(let f=0;f<3;f++){const fx=-sx*.04+(f-1)*.075,base=new THREE.Vector3(fx,-.02,.24);
-      put(taperTube([base,new THREE.Vector3(fx,-.06,.32),new THREE.Vector3(fx*1.05,-.16,.34)],.04,.03,.15,10,8),flesh,0,0,0,o);
-      put(taperTube([new THREE.Vector3(fx*1.05,-.15,.34),new THREE.Vector3(fx*1.05,-.26,.33),new THREE.Vector3(fx*1.05,-.33,.26)],.026,.002,0,12,8),ivory,0,0,0,o)} // talons
-    put(taperTube([new THREE.Vector3(sx*.12,.18,-.12),new THREE.Vector3(sx*.18,.36,-.16),new THREE.Vector3(sx*.32,.47,-.06)],.05,.003,0,14,10),ivory,0,0,0,o); // spike
-    A.position.set(sx*.56,2.02,-.3);A.rotation.y=-sx*.1;T.add(A)}
+  // seat: a plain red satin box cushion right on the skull
+  put(padded(rrect(.86,.48,.03),.06,.04),satin(),0,.78,.28,{r:[-Math.PI/2,0,0]});
+  // back: a flat plywood board with an arched top, the coffin-shaped tufted satin and a padded arch set into it
+  const BY=.78,BZ=-.3;
+  put(new THREE.ExtrudeGeometry(headboard(1.0,1.18,.72),{depth:.04,bevelEnabled:true,bevelThickness:.006,bevelSize:.006,bevelSegments:2,curveSegments:32}),ply,0,BY,BZ);
+  const coffin=new THREE.Shape();coffin.moveTo(-.17,0);coffin.lineTo(.17,0);coffin.lineTo(.29,.76);coffin.lineTo(.24,1.02);coffin.lineTo(-.24,1.02);coffin.lineTo(-.29,.76);coffin.lineTo(-.17,0);
+  const BUTTONS=[[-.1,.42],[.1,.42],[-.1,.62],[.1,.62],[-.1,.82],[.1,.82]];
+  const tufts=tex(256,384,(g,w,h)=>{g.fillStyle='#909090';g.fillRect(0,0,w,h); // dimples at the buttons, creases running out from them
+    const px=([x,y])=>[(x+.3)/.6*w,h-y/1.04*h];
+    for(const b of BUTTONS){const [x,y]=px(b);for(const a of [.6,2.5,3.8,5.6]){const lg=g.createLinearGradient(x,y,x+Math.cos(a)*30,y+Math.sin(a)*30);lg.addColorStop(0,'rgba(40,40,40,.45)');lg.addColorStop(1,'rgba(40,40,40,0)');g.strokeStyle=lg;g.lineWidth=6;g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(a)*30,y+Math.sin(a)*30);g.stroke()}
+      const rg=g.createRadialGradient(x,y,0,x,y,26);rg.addColorStop(0,'#101010');rg.addColorStop(1,'rgba(144,144,144,0)');g.fillStyle=rg;g.fillRect(x-26,y-26,52,52)}});
+  tufts.repeat.set(1/.6,1/1.04);tufts.offset.set(.5,0);
+  put(padded(coffin,.03,.035),satin({bumpMap:tufts,bumpScale:.018}),0,BY+.1,BZ+.03);
+  for(const [bx,by] of BUTTONS)put(new THREE.SphereGeometry(.015,10,8),socket,bx,BY+.1+by,BZ+.125);
+  const archPad=new THREE.Shape();archPad.absarc(0,0,.25,0,Math.PI,false);archPad.lineTo(.25,0);
+  put(padded(archPad,.03,.03),satin(),0,BY+1.27,BZ+.03);
+  put(new THREE.ConeGeometry(.022,.4,8),ply,.46,BY+1.38,BZ+.02); // the spike at the top right
+  // drapes, black and dark red, hanging behind the board from the arms
+  const rag=tex(128,256,(g,w,h)=>{g.fillStyle='#fff';g.beginPath();g.moveTo(0,0);g.lineTo(w,0);for(let x=w;x>=0;x-=6)g.lineTo(x,h*rand(.85,1));g.closePath();g.fill();for(let i=0;i<4;i++)g.clearRect(rand(0,w),rand(.5,.92)*h,rand(3,8),rand(10,24))});
+  const drape=col=>new THREE.MeshStandardMaterial({color:lin(col),alphaMap:rag,alphaTest:.5,side:THREE.DoubleSide,roughness:.6});
+  for(const [sx,col,dz] of [[-1,0x0c0a0b,0],[1,0x0c0a0b,0],[-1,0x4f1520,.05],[1,0x3e1018,.05]]){const geo=new THREE.PlaneGeometry(.6,2.0,24,30),p=geo.attributes.position;
+    for(let i=0;i<p.count;i++){const x=p.getX(i),y=p.getY(i),down=(1-y)/2;p.setZ(i,Math.sin(x*28+dz*40)*(.015+.04*down)+Math.sin(x*8+y*2)*.025);p.setX(i,x*(1+.3*down))}
+    geo.computeVertexNormals();put(geo,drape(col),sx*(.62+dz),1.0,BZ-.12+dz,{r:[0,sx*.55,0]})}
+  // monster arms lying over the top corners and spreading outward and back, talons hooking over the board
+  for(const sx of [-1,1]){const A=new THREE.Group(),q={to:A};
+    put(taperTube([new THREE.Vector3(sx*.95,-.2,-.5),new THREE.Vector3(sx*.7,.02,-.35),new THREE.Vector3(sx*.38,.1,-.12),new THREE.Vector3(sx*.12,.05,.04)],.17,.12,.25,30,12),flesh,0,0,0,q);
+    put(lumpy(.13,.25),flesh,sx*.08,.03,.08,{...q,s:[1.3,.8,1.1]}); // knuckles
+    for(let f=0;f<3;f++){const fx=sx*.08+(f-1)*.075;
+      put(taperTube([new THREE.Vector3(fx,.0,.14),new THREE.Vector3(fx,-.03,.22),new THREE.Vector3(fx*1.05,-.11,.25)],.042,.032,.15,10,8),flesh,0,0,0,q);
+      put(taperTube([new THREE.Vector3(fx*1.05,-.1,.25),new THREE.Vector3(fx*1.05,-.22,.24),new THREE.Vector3(fx*1.05,-.29,.17)],.03,.002,0,12,8),ivory,0,0,0,q)} // talons
+    put(taperTube([new THREE.Vector3(sx*.45,.14,-.18),new THREE.Vector3(sx*.42,.34,-.24),new THREE.Vector3(sx*.28,.48,-.16)],.055,.003,0,14,10),ivory,0,0,0,q); // horn
+    A.position.set(sx*.42,BY+1.22,BZ+.02);T.add(A)}
+  skull(.13,.36,BY+1.15,BZ+.2,-.3); // tiny skulls on the right claw, as on the real one
+  skull(.1,.46,BY+1.24,BZ+.16,-.2);
   T.position.set(THRONE.x,0,THRONE.z);T.rotation.y=THRONE.turn;scene.add(T);
-  const cs=new THREE.Mesh(new THREE.PlaneGeometry(2,1.5),new THREE.MeshBasicMaterial({map:contactMap,transparent:true,depthWrite:false}));cs.rotation.set(-Math.PI/2,0,THRONE.turn);cs.position.set(THRONE.x,.004,THRONE.z);scene.add(cs);
+  const cs=new THREE.Mesh(new THREE.PlaneGeometry(2.2,1.5),new THREE.MeshBasicMaterial({map:contactMap,transparent:true,depthWrite:false}));cs.rotation.set(-Math.PI/2,0,THRONE.turn);cs.position.set(THRONE.x,.004,THRONE.z);scene.add(cs);
   const b=new CANNON.Body({mass:0,material:M.wood});b.addShape(new CANNON.Box(new CANNON.Vec3(.62,1.12,.45)));b.position.set(THRONE.x,1.12,THRONE.z);b.quaternion.setFromAxisAngle(new CANNON.Vec3(0,1,0),THRONE.turn);world.addBody(b);
 }
 throne();
