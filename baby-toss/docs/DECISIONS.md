@@ -102,3 +102,5 @@ the end.
   skin, like the throne's skull; glassy textured doll eyes with real eyelids replace painted eyes (blinks now move the
   lids). The skin glows slightly warm and takes less of the lawn's reflected light, which had turned shadows olive.
   Cries are built from a per-baby voice and six patterns (Claude's call).
+- 2026-11-27: Fixed the held baby keeping one look all game (it was made once at page load); now every toss is a new
+  baby, and the thrown baby keeps the held baby's look instead of getting a random one (user).

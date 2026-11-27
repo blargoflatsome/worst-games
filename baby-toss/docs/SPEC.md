@@ -94,6 +94,8 @@ is the written version.
   that close for blinks and crying; an open mouth while crying; painted hair with a curl; chubby arms with fingers and a
   thumb; toes on the feet (realism raised again at the user's request, 2026-11-27); a neck and waist that follow the ragdoll's
   bends. Looks only: the physics shapes and sizes are unchanged.
+- **A different baby every toss** (user, 2026-11-27): each baby you pick up has a new look (onesie colour and pattern,
+  hair, eyes), never the same onesie colour twice in a row, and the baby you throw is the one you were holding.
 - Babies stay where they land for the rest of the turn, so later babies can hit them. The yard is cleared between
   turns. (user, 2026-11-27)
 

@@ -475,13 +475,15 @@ const eyeGeo=new THREE.SphereGeometry(.0125,28,18),lidGeo=new THREE.SphereGeomet
 const EYE_AT=[[-.0245,.0072,.054],[.0245,.0072,.054]]; // eyes[0] is the doll's left eye
 const LID={open:-.22,shut:1.45}; // upper lid turned back (open) or down over the eye (shut)
 const hairGeo=new THREE.SphereGeometry(1,48,20,0,Math.PI*2,0,Math.PI*.45);
-function dollVisual(){
-  const g=new THREE.Group(),cloth=new THREE.MeshStandardMaterial({color:lin(R(ONESIES)),roughness:.95,map:R(KNITS)});
+// a baby's look: onesie colour and pattern, hair and eyes; a new look never repeats the last onesie colour
+const newLook=prev=>{let l;do{l={onesie:R(ONESIES),knit:R(KNITS),hair:R(hairMats),eyes:R(EYES)}}while(prev&&l.onesie===prev.onesie);return l};
+function dollVisual(look=newLook()){
+  const g=new THREE.Group(),cloth=new THREE.MeshStandardMaterial({color:lin(look.onesie),roughness:.95,map:look.knit});
   const head=new THREE.Group();head.add(mk(headGeo,headSkin,...HEAD_SCALE));
   for(const s of [-1,1]){const e=at(mk(sph,skin,.011,.019,.008),s*.071,0,-.004);e.rotation.y=s*.3;head.add(e)} // ears
-  const hairMat=R(hairMats),hair=at(mk(hairGeo,hairMat,.0765,.078,.0752),0,.004,-.006);hair.rotation.x=-.35;head.add(hair); // a clean hairline above the forehead
+  const hairMat=look.hair,hair=at(mk(hairGeo,hairMat,.0765,.078,.0752),0,.004,-.006);hair.rotation.x=-.35;head.add(hair); // a clean hairline above the forehead
   const curl=at(mk(sph,hairMat,.013,.009,.018),0,.075,.03);curl.rotation.x=.6;head.add(curl);
-  const eyeMat=new THREE.MeshPhysicalMaterial({map:R(EYES),roughness:.15,clearcoat:1,clearcoatRoughness:.05});
+  const eyeMat=new THREE.MeshPhysicalMaterial({map:look.eyes,roughness:.15,clearcoat:1,clearcoatRoughness:.05});
   const eyes=[],lids=[];
   for(const [x,y,z] of EYE_AT){
     const e=at(new THREE.Mesh(eyeGeo,eyeMat),x,y,z);head.add(e);eyes.push(e);
@@ -506,8 +508,10 @@ function dollVisual(){
   const legs=[0,1].map(()=>mk(legGeo,cloth,1,1,1));
   const neck=mk(cylU,skin,.03,1,.028),waist=mk(cylU,cloth,.056,1,.05);
   const parts=[head,chest,hips,...arms,...feet];parts.concat(legs,[neck,waist]).forEach(p=>g.add(p));scene.add(g);
-  return {g,parts,legs,neck,waist,eyes,lids,mouth,cloth,eyeMat};
+  return {g,parts,legs,neck,waist,eyes,lids,mouth,cloth,eyeMat,hair,curl,look};
 }
+// dress an existing baby in a look (the one in your hand gets a new one for every toss)
+function setLook(v,look){v.look=look;v.cloth.color.copy(lin(look.onesie));v.cloth.map=look.knit;v.cloth.needsUpdate=true;v.hair.material=v.curl.material=look.hair;v.eyeMat.map=look.eyes;v.eyeMat.needsUpdate=true}
 const _p=new THREE.Vector3(),_q=new THREE.Quaternion(),_h=new THREE.Vector3(),_d=new THREE.Vector3();
 function drawLeg(leg,hip,foot){_d.copy(foot).sub(hip);const len=Math.max(.001,_d.length());leg.position.copy(hip).addScaledVector(_d,.5);leg.quaternion.setFromUnitVectors(UP,_d.divideScalar(len));leg.scale.y=len}
 // the neck and waist join head to chest and chest to hips, wherever the ragdoll has bent them
@@ -525,8 +529,8 @@ function drawBodies(d){
 }
 
 const dolls=[];
-function spawnDoll(P,Q,vel,omega){
-  const v=dollVisual(),com=new THREE.Vector3(0,.03,0).applyQuaternion(Q).add(P);
+function spawnDoll(P,Q,vel,omega,look){
+  const v=dollVisual(look),com=new THREE.Vector3(0,.03,0).applyQuaternion(Q).add(P);
   const d={v,age:0,still:0,agit:vel?1:0,phase:Math.random()*9,cryCD:0,crying:0,nextWhimper:rand(4,9),landed:!vel,grip:null,state:'pose'};
   d.bodies=PART_DEF.map(def=>{
     const b=new CANNON.Body({mass:def.mass,material:M[def.mat],linearDamping:.03,angularDamping:.35});
@@ -719,13 +723,13 @@ function startTurn(sub){
   $('#bannerName').textContent=MSG.turn(p.name);$('#bannerSub').textContent=sub||(S.tb?MSG.tiebreak:MSG.babies3);$('#banner').hidden=false;
   S.phase='banner';S.wait=1.4;hud();
 }
-function readyThrow(){S.phase='aim';aim.yaw=0;aim.power=0;held.g.visible=true;$('#grips').hidden=false;$('#hint').hidden=!S.first;hud()}
+function readyThrow(){setLook(held,newLook(held.look));S.phase='aim';aim.yaw=0;aim.power=0;held.g.visible=true;$('#grips').hidden=false;$('#hint').hidden=!S.first;hud()}
 function doThrow(){
   if(aim.power<.06){showGuide(false);aim.active=false;return}
   audio();const sc=grip.scatter,yaw=aim.yaw+rand(-1,1)*sc,pitch=grip.pitch+rand(-1,1)*sc*.7;
   const v=launchVel(yaw,pitch,1+rand(-1,1)*sc*.8),{P,Q}=heldPose(aim.power,clock.elapsedTime);
   const omega=new THREE.Vector3(...grip.spin).multiplyScalar(rand(.85,1.15)).applyAxisAngle(UP,-yaw);
-  const d=spawnDoll(P,Q,v,omega);d.state='flying';d.grip=grip;d.yaw=yaw;S.flying=d;
+  const d=spawnDoll(P,Q,v,omega,held.look);d.state='flying';d.grip=grip;d.yaw=yaw;S.flying=d;
   held.g.visible=false;showGuide(false);aim.active=false;$('#grips').hidden=true;
   S.left--;S.first=false;$('#hint').hidden=true;S.phase='flying';hud();
 }
