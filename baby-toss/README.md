@@ -11,12 +11,12 @@ Open `index.html` in a browser (phone or computer). It loads three.js and cannon
 - Pick a grip, then swipe up on the yard. A longer swipe throws farther, and the angle of the swipe aims.
 - Keyboard: `1`–`7` pick a grip, arrow keys aim and set power, `Space` or `Enter` throws.
 
-## Rules (Classic)
+## Rules
 
 - Three cans: the small front can is worth **2**, the big tall middle can **1**, and the very small bucket hidden behind the middle can **5**.
 - A baby only counts if it's **fully in** the can.
 - Each player tosses **3 babies** a turn.
-- Pick the target score at the start (default **20**). You have to hit it **exactly**. Points that would take you over don't count.
+- Pick the target score at the start (default **20**). You have to hit it **exactly**. Go over and you **bust**: your score goes back to what it was at the start of that turn, and your turn ends.
 - The round always finishes, so everyone gets the same number of turns. If more than one player is on the target at the end of a round, they play tiebreak turns until one scores the most.
 - Multiplayer, with optional teams.
 
@@ -36,7 +36,3 @@ The babies have a stuffed, floppy body with a hard vinyl head, arms and feet. Ea
 
 - **Living babies**: in the game the babies wiggle and cry. Turn it off and they're just dolls.
 - **Sound**: on or off.
-
-## Coming later
-
-**Splat!** is a second mode that plays like HORSE. It gets built once its rules are written down.

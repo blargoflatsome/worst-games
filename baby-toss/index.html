@@ -122,7 +122,7 @@ h1{font-size:40px}
   <form class="card" id="setup" novalidate>
     <h1 class="slab">Baby Toss</h1>
     <p class="tag">Kid Tested, Mother Approved!</p>
-    <p class="rules">Everyone gets <b>3 babies</b> a turn. A baby only counts if it's <b>fully in</b> the can. Front can <b>2</b>, tall can <b>1</b>, the little bucket hiding at the back <b>5</b>. Hit the target <b>exactly</b>: points that would take you over don't count. The round always finishes, so everyone gets the same number of turns. Hold each baby by the head, a hand, a foot, both feet, or overhand by the body. Each throws differently.</p>
+    <p class="rules">Everyone gets <b>3 babies</b> a turn. A baby only counts if it's <b>fully in</b> the can. Front can <b>2</b>, tall can <b>1</b>, the little bucket hiding at the back <b>5</b>. Hit the target <b>exactly</b>: go over and you bust, back to your score from the start of that turn. The round always finishes, so everyone gets the same number of turns. Hold each baby by the head, a hand, a foot, both feet, or overhand by the body. Each throws differently.</p>
     <div class="opt" style="border-top:0;padding-top:0"><label for="teams">Teams<small>Split players into two teams</small></label><input type="checkbox" class="sw" id="teams"></div>
     <div class="sec">Players</div>
     <div id="players"></div>
@@ -132,7 +132,6 @@ h1{font-size:40px}
     <div class="opt"><label for="sound">Sound</label><input type="checkbox" class="sw" id="sound"></div>
     <p class="err" id="setupErr" role="alert"></p>
     <button class="go slab" type="submit">Start tossing</button>
-    <p class="soon">Splat! mode is coming once its rules are in.</p>
   </form>
 </div>
 
@@ -421,7 +420,7 @@ function startGame(){
   S.sides=buildSides();S.pos=0;S.side=0;S.round=0;S.tb=null;S.first=true;$('#menu').hidden=true;$('#over').hidden=true;$('#hud').hidden=false;startTurn();
 }
 function startTurn(sub){
-  clearDolls();hush();const side=S.sides[S.side];S.player=side.members[S.round%side.members.length];S.left=3;
+  clearDolls();hush();const side=S.sides[S.side];S.player=side.members[S.round%side.members.length];S.left=3;S.turnStart=side.score;
   grip=GRIPS.find(g=>g.id===S.player.grip)||GRIPS[0];renderGrips();
   $('#bannerName').textContent=S.player.name+"'s turn";$('#bannerSub').textContent=sub||(S.tb?'Tiebreak: most points this turn':setup.teams?side.name:'3 babies');$('#banner').hidden=false;
   S.phase='banner';S.wait=1.4;hud();
@@ -437,14 +436,15 @@ function doThrow(){
   S.left--;S.first=false;$('#hint').hidden=true;S.phase='flying';hud();
 }
 function settle(d){
-  const side=S.sides[S.side],over=d.bodies[1].position.z<FENCE_Z-.2,c=over?null:canFor(d);let pts=c?c.pts:0,note=over?'Over the fence!':'';
+  const side=S.sides[S.side],over=d.bodies[1].position.z<FENCE_Z-.2,c=over?null:canFor(d);let pts=c?c.pts:0,note=over?'Over the fence!':'',bust=false;
   if(S.tb){S.tb.pts[S.side]=(S.tb.pts[S.side]||0)+pts}
   else{
-    if(pts&&side.score+pts>setup.target){note=`Over ${setup.target}, doesn't count`;pts=0}
-    side.score+=pts;if(pts&&side.score===setup.target){note=`Right on ${setup.target}!`;S.left=0}
+    // Bust (SPEC §6): going over the target puts the score back to the start of this turn and ends the turn
+    if(pts&&side.score+pts>setup.target){bust=true;side.score=S.turnStart;S.left=0;note=`Back to ${S.turnStart}`}
+    else{side.score+=pts;if(pts&&side.score===setup.target){note=`Right on ${setup.target}!`;S.left=0}}
   }
-  const pop=$('#pop');pop.innerHTML=(c&&!pts&&!S.tb?'No good':(pts===1?'1 PT':pts+' PTS'))+(note?`<small>${esc(note)}</small>`:'');pop.hidden=false;pop.classList.remove('show');void pop.offsetWidth;pop.classList.add('show');
-  sfx.score(pts);if(c&&settings.alive)setTimeout(()=>cry(d,.6),500);
+  const pop=$('#pop');pop.innerHTML=(bust?'BUST!':(pts===1?'1 PT':pts+' PTS'))+(note?`<small>${esc(note)}</small>`:'');pop.hidden=false;pop.classList.remove('show');void pop.offsetWidth;pop.classList.add('show');
+  sfx.score(bust?0:pts);if(c&&settings.alive)setTimeout(()=>cry(d,.6),500);
   hud();S.cur=null;S.phase='between';S.wait=1.5;
 }
 function nextAfterThrow(){
@@ -470,7 +470,7 @@ function hud(){
   $('#babies').innerHTML=[0,1,2].map(i=>`<span class="${i<S.left?'':'used'}">${babyIcon}</span>`).join('');
   $('#babies').setAttribute('aria-label',S.left+' babies left');
   $('#board').innerHTML=S.sides.map((s,i)=>`<div class="row${i===S.side?' on':''}"><span>${esc(s.name)}</span><span>${s.score}${S.tb&&S.tb.sides.includes(i)?` <em>+${S.tb.pts[i]||0}</em>`:''}</span></div>`).join('')
-    +`<div class="to">${S.tb?'Tiebreak':'Round '+(S.round+1)} · exactly ${setup.target}</div><div class="to">Front 2 · Tall 1 · Bucket 5</div>`;
+    +`<div class="to">${S.tb?'Tiebreak · most points':'Round '+(S.round+1)+' · exactly '+setup.target}</div><div class="to">Front 2 · Tall 1 · Bucket 5</div>`;
 }
 function renderGrips(){
   $('#gripRow').innerHTML=GRIPS.map((g,i)=>`<button type="button" role="radio" aria-checked="${g===grip}" data-grip="${g.id}" aria-keyshortcuts="${i+1}">${g.label}</button>`).join('');
