@@ -145,9 +145,14 @@ is the written version.
 - Each player's last grip is remembered for their next turn. (Claude's call)
 
 ## 8. Controls (Claude's call)
-- **Touch or mouse:** pick a grip from the row of buttons along the bottom, then swipe up on the yard. A longer swipe
-  throws harder; the angle of the swipe aims left or right. While swiping, a short dotted arc and a power bar show
-  the start of the throw (not where it lands). A very short swipe doesn't throw.
+- **Touch or mouse:** pick a grip from the row of buttons along the bottom, then swipe up. A swipe can start
+  anywhere, the grip buttons included: a tap on a grip picks it, and moving the finger up turns it into a throw.
+  How far up the finger goes sets the power (full power at 70% of the screen height, at most 560 px); how far it
+  moves sideways aims left or right, gently. Power sets the square of the speed, so each can gets about the same
+  stretch of the swipe. The throw uses where the finger was 0.08 s before it lifted, so the flick of letting go
+  doesn't change it. While swiping, a short dotted arc and a power bar show the start of the throw (not where it
+  lands). A very short swipe doesn't throw. (2026-11-27: the user found the old swipe area too small and the
+  power too touchy on a Samsung phone; this is Claude's fix, agreed by the user)
 - **Keyboard:** 1 to 7 pick a grip, Left and Right aim, Up and Down set power, Space or Enter throws.
 - A hint explains swiping before the first throw of a game.
 

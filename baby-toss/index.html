@@ -69,7 +69,8 @@ h1{margin:0;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em;c
 #grips{position:fixed;left:0;right:0;bottom:0;padding-bottom:max(10px,env(safe-area-inset-bottom,0px));text-align:center;pointer-events:none}
 #gripRow{display:flex;gap:6px;overflow-x:auto;padding:4px max(16px,env(safe-area-inset-left,0px));scrollbar-width:none;pointer-events:auto}
 #gripRow::before,#gripRow::after{content:"";margin:auto}
-#gripRow button{flex:none;height:44px;padding:0 14px;border-radius:22px;border:2px solid #fff;background:#ffffffd9;font-weight:900;font-size:14px;white-space:nowrap;box-shadow:0 2px 8px #0002}
+#gripRow{touch-action:pan-x}
+#gripRow button{-webkit-user-select:none;user-select:none;flex:none;height:44px;padding:0 14px;border-radius:22px;border:2px solid #fff;background:#ffffffd9;font-weight:900;font-size:14px;white-space:nowrap;box-shadow:0 2px 8px #0002}
 #gripRow button[aria-checked=true]{background:var(--pink);border-color:var(--pink);color:#fff}
 #gripNote{display:inline-block;margin-top:6px;background:#241a33cc;color:#fff;font-weight:800;font-size:13px;padding:4px 12px;border-radius:10px}
 #board em{font-style:normal;color:var(--pink)}
@@ -111,7 +112,7 @@ h1{font-size:40px}
   </div>
 </div>
 <div id="grips" hidden><div id="gripRow" role="radiogroup" aria-label="How to hold the baby"></div><div id="gripNote" aria-live="polite"></div></div>
-<div id="hint" hidden>Pick a grip, then swipe up on the yard to toss. Longer swipe throws farther; angle it to aim.</div>
+<div id="hint" hidden>Pick a grip, then swipe up anywhere to toss. A longer swipe throws farther; slide sideways to aim.</div>
 <div id="meter" hidden><i></i></div>
 <div id="pop" class="slab" hidden></div>
 <div id="banner" hidden><div class="slab" id="bannerName"></div><div id="bannerSub"></div></div>
@@ -391,7 +392,10 @@ function heldPose(pull,t){const Q=gripQ(grip,aim.yaw),H=new THREE.Vector3(...gri
 const held=Object.assign(dollVisual(),{agit:.35,phase:0,crying:0});held.g.visible=false;
 const dots=[];for(let i=0;i<9;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.022,10,8),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.9-i*.08}));m.visible=false;scene.add(m);dots.push(m)}
 const aim={yaw:0,power:0,active:false};
-function launchVel(yaw,pitch,mult){const sp=(3.6+aim.power*6.3)*grip.speed*mult;return new THREE.Vector3(Math.sin(yaw)*Math.cos(pitch)*sp,Math.sin(pitch)*sp,-Math.cos(yaw)*Math.cos(pitch)*sp)}
+// Power sets the square of the speed, so each step of power adds the same distance and the cans are spread
+// evenly along the swipe (SPEC §8).
+const SPEED_MIN=4.5,SPEED_MAX=9.9;
+function launchVel(yaw,pitch,mult){const sp=Math.sqrt(SPEED_MIN**2+aim.power*(SPEED_MAX**2-SPEED_MIN**2))*grip.speed*mult;return new THREE.Vector3(Math.sin(yaw)*Math.cos(pitch)*sp,Math.sin(pitch)*sp,-Math.cos(yaw)*Math.cos(pitch)*sp)}
 function showGuide(on){dots.forEach(d=>d.visible=on);$('#meter').hidden=!on;if(!on)return;const v=launchVel(aim.yaw,grip.pitch,1),H=new THREE.Vector3(...grip.hand);dots.forEach((d,i)=>{const t=(i+1)*.04;d.position.set(H.x+v.x*t,H.y+v.y*t-4.91*t*t,H.z+v.z*t)});$('#meter i').style.height=(aim.power*100).toFixed(0)+'%'}
 
 /* ---------- sound ---------- */
@@ -518,11 +522,39 @@ function pickGrip(id){grip=GRIPS.find(g=>g.id===id)||grip;if(S.phase==='aim')cur
 $('#gripRow').addEventListener('click',e=>{const b=e.target.closest('[data-grip]');if(b)pickGrip(b.dataset.grip)});
 
 /* ---------- input ---------- */
-let drag=null;
-canvas.addEventListener('pointerdown',e=>{if(S.phase!=='aim'||S.paused)return;audio();canvas.setPointerCapture(e.pointerId);drag={x:e.clientX,y:e.clientY};aim.active=true;aim.power=0;aim.yaw=0});
-canvas.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x,dy=drag.y-e.clientY,H=canvas.clientHeight;aim.power=Math.max(0,Math.min(1,dy/(H*.45)));aim.yaw=dy>8?Math.max(-.4,Math.min(.4,Math.atan2(dx,dy)*.35)):0;showGuide(aim.power>.02)});
-const endDrag=()=>{if(!drag)return;drag=null;doThrow()};
-canvas.addEventListener('pointerup',endDrag);canvas.addEventListener('pointercancel',()=>{drag=null;aim.active=false;showGuide(false)});
+/* Swipe to throw (SPEC §8). A swipe can start anywhere, the grip buttons included: there a tap picks the grip
+   and only an upward move turns into a throw. Power comes from how far up the finger goes, aim from how far
+   sideways. The throw uses where the finger was a moment before it lifted, so the lift-off flick doesn't count. */
+const SWIPE={full:.7,fullMax:560,start:10,aimWidth:500,aimMax:.4,aimGain:.6,lookback:80};
+let drag=null,swallowClick=false;
+function dragStart(e,started){
+  if(S.phase!=='aim'||S.paused||e.button!==0||drag)return;
+  audio();swallowClick=false;drag={id:e.pointerId,x:e.clientX,y:e.clientY,started,hist:[]};
+  if(started){aim.active=true;aim.power=0;aim.yaw=0}
+}
+canvas.addEventListener('pointerdown',e=>dragStart(e,true));
+$('#gripRow').addEventListener('pointerdown',e=>dragStart(e,false));
+addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  const dx=e.clientX-drag.x,dy=drag.y-e.clientY;
+  if(!drag.started){if(dy<SWIPE.start||dy<Math.abs(dx))return;drag.started=true;swallowClick=true;aim.active=true}
+  const full=Math.min(innerHeight*SWIPE.full,SWIPE.fullMax);
+  aim.power=Math.max(0,Math.min(1,dy/full));
+  aim.yaw=Math.max(-SWIPE.aimMax,Math.min(SWIPE.aimMax,dx/Math.min(innerWidth,SWIPE.aimWidth)*SWIPE.aimGain));
+  drag.hist.push({t:e.timeStamp,power:aim.power,yaw:aim.yaw});
+  while(drag.hist.length>2&&drag.hist[1].t<e.timeStamp-300)drag.hist.shift();
+  showGuide(aim.power>.02);
+});
+addEventListener('pointerup',e=>{
+  if(!drag||e.pointerId!==drag.id)return;
+  const d=drag;drag=null;if(!d.started)return;
+  const before=d.hist.filter(h=>h.t<=e.timeStamp-SWIPE.lookback).pop()||d.hist[0];
+  if(before){aim.power=before.power;aim.yaw=before.yaw}
+  doThrow();
+});
+addEventListener('pointercancel',e=>{if(!drag||e.pointerId!==drag.id)return;drag=null;aim.active=false;showGuide(false)});
+// a swipe that started on a grip button must not also pick that grip
+$('#gripRow').addEventListener('click',e=>{if(swallowClick){swallowClick=false;e.stopPropagation();e.preventDefault()}},true);
 addEventListener('keydown',e=>{
   if(S.phase!=='aim'||S.paused||e.target.tagName==='INPUT')return;
   const k=e.key;

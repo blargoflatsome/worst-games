@@ -42,3 +42,9 @@ the end.
   picture only. Claude's calls: "same moment" is 0.35 s (open question in SPEC §13), stopped is 0.5 s still, the
   wait for the last baby is capped at 6 s, and a late in's call says "Late in!". Also moved the script's messages
   into one `MSG` table and the scoring and turn order into plain functions (CODING_STANDARDS §2, §4).
+- 2026-11-27: Swipe controls reworked after the user played on a Samsung phone: the swipe area felt small, the front
+  can was hard to aim for, and releasing often threw short or far. A swipe can now start on the grip buttons (the
+  bottom of the screen, where the thumb starts), full power needs a longer swipe and power is spread evenly across
+  the cans (front to tall can went from about 40 px to about 90 px of finger travel), aim follows sideways
+  movement instead of the swipe's angle, and the last 0.08 s before the finger lifts is ignored. (user agreed to
+  Claude's proposal)
