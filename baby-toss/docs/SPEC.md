@@ -179,6 +179,10 @@ is the written version.
   it. A ring marks where the pull started; pulling back to it cancels. While pulling, a dashed line on the grass
   points where the throw heads (a fixed length, so it never shows where the baby lands), and a power bar shows the
   power. (2026-11-27: replaced a dotted arc, which spread up the screen and hid how aiming worked) (Claude's call: the numbers)
+- **When the grips don't fit** across the screen (user, 2026-11-27: couldn't reach them with a mouse): the row
+  scrolls sideways by swiping, by an ordinary mouse wheel, or by clicking the half-hidden grip at the edge, which picks
+  it and brings the next one into view; the edge with more grips beyond it fades out. Picking a grip by key scrolls it
+  into view too.
 - **Keyboard:** 1 to 7 pick a grip, Left and Right aim, Up and Down set power, Space or Enter throws.
 - A hint explains swiping before the first throw of a game.
 

@@ -74,7 +74,16 @@ h1{font-family:Fraunces,Georgia,serif;font-weight:900;margin:0;font-size:clamp(4
 #grips{position:fixed;left:0;right:0;bottom:0;padding-bottom:max(10px,env(safe-area-inset-bottom,0px));text-align:center;pointer-events:none}
 #gripRow{display:flex;gap:6px;overflow-x:auto;padding:4px max(16px,env(safe-area-inset-left,0px));scrollbar-width:none;pointer-events:auto}
 #gripRow::before,#gripRow::after{content:"";margin:auto}
-#gripRow{touch-action:pan-x}
+#gripRow{touch-action:pan-x;scroll-padding-inline:48px}
+/* when the grips don't fit, the edge with more grips beyond it fades out (browsers without scroll-driven animation just show no fade) */
+@property --fade-start{syntax:"<length>";inherits:false;initial-value:0px}
+@property --fade-end{syntax:"<length>";inherits:false;initial-value:0px}
+@supports (animation-timeline:scroll()){
+#gripRow{--fade-size:48px;mask:linear-gradient(black,black) no-clip subtract,linear-gradient(to right,black,transparent) 0 0/var(--fade-start) 100% no-repeat no-clip,linear-gradient(to right,transparent,black) 100% 0/var(--fade-end) 100% no-repeat no-clip;
+  animation:grip-fade-start linear both,grip-fade-end linear both;animation-timeline:scroll(self inline);animation-range:0 var(--fade-size),calc(100% - var(--fade-size)) 100%}
+@keyframes grip-fade-start{to{--fade-start:var(--fade-size)}}
+@keyframes grip-fade-end{from{--fade-end:var(--fade-size)}}
+}
 #gripRow button{-webkit-user-select:none;user-select:none;flex:none;height:44px;padding:0 14px;border-radius:22px;border:2px solid #fff;background:#ffffffd9;font-weight:900;font-size:14px;white-space:nowrap;box-shadow:0 2px 8px #0002}
 #gripRow button[aria-checked=true]{background:var(--pink);border-color:var(--pink);color:#fff}
 #gripNote{display:inline-block;margin-top:6px;background:#241a33cc;color:#fff;font-weight:800;font-size:13px;padding:4px 12px;border-radius:10px}
@@ -765,7 +774,7 @@ function startTurn(sub){
   $('#bannerName').textContent=MSG.turn(p.name);$('#bannerSub').textContent=sub||(S.tb?MSG.tiebreak:MSG.babies3);$('#banner').hidden=false;
   S.phase='banner';S.wait=1.4;hud();
 }
-function readyThrow(){setLook(held,newLook(held.look));S.phase='aim';aim.yaw=0;aim.power=0;held.g.visible=true;$('#grips').hidden=false;$('#hint').hidden=!S.first;hud()}
+function readyThrow(){setLook(held,newLook(held.look));S.phase='aim';aim.yaw=0;aim.power=0;held.g.visible=true;$('#grips').hidden=false;revealGrip();$('#hint').hidden=!S.first;hud()}
 function doThrow(){
   if(aim.power<.06){showGuide(false);aim.active=false;return}
   audio();const sc=grip.scatter,yaw=aim.yaw+rand(-1,1)*sc,pitch=grip.pitch+rand(-1,1)*sc*.7;
@@ -830,7 +839,14 @@ function renderGrips(){
   $('#gripRow').innerHTML=GRIPS.map((g,i)=>`<button type="button" role="radio" aria-checked="${g===grip}" data-grip="${g.id}" aria-keyshortcuts="${i+1}">${g.label}</button>`).join('');
   $('#gripNote').textContent=grip.note;
 }
-function pickGrip(id){grip=GRIPS.find(g=>g.id===id)||grip;if(S.phase==='aim')current().grip=grip.id;renderGrips();if(aim.active)showGuide(true)}
+function pickGrip(id){grip=GRIPS.find(g=>g.id===id)||grip;if(S.phase==='aim')current().grip=grip.id;renderGrips();revealGrip();if(aim.active)showGuide(true)}
+// keep the chosen grip in view, with room to see the next one: clicking a half-hidden grip at the edge brings the
+// rest into reach, so a mouse with no sideways scrolling can get to every grip
+function revealGrip(){const row=$('#gripRow'),b=row.querySelector('[aria-checked=true]');if(!b||row.scrollWidth<=row.clientWidth)return;
+  const br=b.getBoundingClientRect(),rr=row.getBoundingClientRect(),pad=56,behavior=matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
+  if(br.left<rr.left+pad)row.scrollBy({left:br.left-rr.left-pad,behavior});else if(br.right>rr.right-pad)row.scrollBy({left:br.right-rr.right+pad,behavior})}
+// an ordinary up-down mouse wheel scrolls the grips sideways
+$('#gripRow').addEventListener('wheel',e=>{const row=e.currentTarget;if(row.scrollWidth>row.clientWidth&&Math.abs(e.deltaY)>Math.abs(e.deltaX)){row.scrollLeft+=e.deltaY;e.preventDefault()}},{passive:false});
 $('#gripRow').addEventListener('click',e=>{const b=e.target.closest('[data-grip]');if(b)pickGrip(b.dataset.grip)});
 
 /* ---------- input ---------- */

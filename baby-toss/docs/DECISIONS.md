@@ -121,3 +121,5 @@ the end.
 - 2026-11-27: The metal can's high three-tone ding was too cartoonish (user). Now a low modal bong: 20 uneven ringing
   pitches from 165-200 Hz up, higher ones dying faster, a short knock; also for the stuffed body, which had no metal
   sound before. Measured centre about 600 Hz for a head hit, 390 Hz for the body (the ding was 844 Hz, pure tones).
+- 2026-11-27: Fixed grips out of reach with a mouse when the row doesn't fit (user): wheel scrolls the row, picking a
+  grip scrolls it into view with room for the next, edges fade (following the modern-web-guidance tabs pattern).
