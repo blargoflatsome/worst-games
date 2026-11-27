@@ -72,3 +72,10 @@ the end.
   following SPEC §2: acting alive is what that setting turns off).
 - 2026-11-27: Scoreboard fixed at 320 px: the settings button was squeezed to 22 px and long names ran into the
   scores. Long names now end in "…" there.
+- 2026-11-27: The tall can now looks like the user's real can from their photo: galvanized, "BABY TOSS" and the logo
+  in black vinyl (not shiny), no orange "SPLAT!" (user). The lettering looks like Cooper Black, which isn't free for
+  the web; Fraunces 900 with its softness axis at 100 is the closest Google Font (Claude's call). The logo is Claude's
+  vector tracing (a baby diving into a wheelie bin with its lid open), kept once in the page's markup and drawn on the
+  can from the same paths; the user can supply the original to replace it. The home screen shows the logo and uses
+  the font for the name.
+- 2026-11-27: Phase 2 added to the spec: multiple baby skins, some unlockable (user).

@@ -6,7 +6,7 @@
 <title>Baby Toss</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Fraunces:opsz,wght,SOFT@144,900,100&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
 <style>
 /* VOICE occasion: a backyard party game
    IDEA the real backyard from the video: grass, wood fence, blue siding, three cans
@@ -27,7 +27,10 @@ button{cursor:pointer}
 .overlay{position:fixed;inset:0;display:flex;align-items:center;padding:16px max(4vw,16px,env(safe-area-inset-left,0px));padding-right:max(4vw,16px,env(safe-area-inset-right,0px));padding-top:max(16px,env(safe-area-inset-top,0px));padding-bottom:max(16px,env(safe-area-inset-bottom,0px));pointer-events:none}
 .card{pointer-events:auto;background:var(--card);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);border-radius:22px;padding:22px;box-shadow:0 10px 30px #1b2a1a33;max-height:100%;overflow:auto;width:min(420px,100%)}
 #menu{justify-content:flex-start}
-h1{margin:0;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em;color:var(--pink);text-shadow:0 3px 0 #ffd0e0}
+/* the name in the soft heavy serif painted on the user's real can (Fraunces, softest and heaviest) */
+.brand{display:flex;align-items:center;gap:10px}
+.logo{flex:none;width:64px;height:64px;color:var(--ink)}
+h1{font-family:Fraunces,Georgia,serif;font-weight:900;margin:0;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em;color:var(--pink);text-shadow:0 3px 0 #ffd0e0}
 .tag{margin:6px 0 14px;font-weight:900;font-size:18px;color:var(--ink)}
 .rules{margin:0 0 16px;color:var(--muted);font-size:15px}
 .rules b{color:var(--ink)}
@@ -100,6 +103,7 @@ h1{margin:0;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em;c
 #menu{align-items:flex-end}
 #menu .card{width:100%;max-height:78%;padding:18px}
 h1{font-size:40px}
+.logo{width:52px;height:52px}
 }
 @media (prefers-reduced-motion:reduce){#pop.show{animation:none;opacity:1}}
 </style>
@@ -122,7 +126,11 @@ h1{font-size:40px}
 
 <div class="overlay" id="menu">
   <form class="card" id="setup" novalidate>
-    <h1 class="slab">Baby Toss</h1>
+    <div class="brand">
+      <!-- the logo from the user's can: a baby tossed into a wheelie bin with its lid open; the yard's tall can draws these same paths -->
+      <svg id="logo" class="logo" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="logo-fill" fill="currentColor" d="M50 56 L82 56 L78 96 L54 96 Z M47 51 L85 51 L85 57 L47 57 Z M84 93 a6 6 0 1 0 -12 0 a6 6 0 1 0 12 0 Z M82 52 Q90 34 92 12 L96 13 Q95 36 86 54 Z M70 30 a10 10 0 1 0 -20 0 a10 10 0 1 0 20 0 Z M52.5 29.9 A15 10 15 1 0 23.5 22.1 A15 10 15 1 0 52.5 29.9 Z M61 21 q3 -7 10 -5 q-2 6 -8 7 Z"/><path class="logo-line" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" d="M27 22 L16 9 M31 19 L28 5 M50 35 L53 48 M45 36 L42 48"/></svg>
+      <h1>Baby Toss</h1>
+    </div>
     <p class="tag">Kid Tested, Mother Approved!</p>
     <p class="rules">Everyone gets <b>3 babies</b> a turn. A baby only counts if it's <b>fully in</b> the can. Front can <b>2</b>, tall can <b>1</b>, the little bucket hiding at the back <b>5</b>. A baby knocked in later in the turn counts then. Hit the target <b>exactly</b>: go over and you bust, back to your score from the start of that turn. The round always finishes, so everyone gets the same number of turns. Hold each baby by the head, a hand, a foot, both feet, or overhand by the body. Each throws differently.</p>
     <div class="sec">Players</div>
@@ -318,12 +326,32 @@ const fenceBody=new CANNON.Body({mass:0,material:M.wood});fenceBody.addShape(new
 /* ---------- cans ----------
    Drawn as an outside shell, a darker inside and floor, a rolled rim, wear and a soft contact shadow. The physics
    can is a plain ring of boxes. */
-const scuffs=(base,marks,grime)=>tex(512,256,(g,w,h)=>{g.fillStyle=base;g.fillRect(0,0,w,h);
+function wear(g,w,h,base,marks,grime){g.fillStyle=base;g.fillRect(0,0,w,h);
   for(let i=0;i<marks.n;i++){g.strokeStyle=marks.col();g.lineWidth=rand(.5,1.5);const x=Math.random()*w,y=Math.random()*h,l=rand(4,26),a=rand(-.4,.4);for(const dx of [0,-w]){g.beginPath();g.moveTo(x+dx,y);g.lineTo(x+dx+Math.cos(a)*l,y+Math.sin(a)*l);g.stroke()}}
   if(grime){const gg=g.createLinearGradient(0,h,0,h*.55);gg.addColorStop(0,grime);gg.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=gg;g.fillRect(0,0,w,h)}
-});
+}
+const scuffs=(base,marks,grime)=>tex(512,256,(g,w,h)=>wear(g,w,h,base,marks,grime));
+/* The tall can is the user's real one: galvanized, with "BABY TOSS" and the logo in black vinyl on the front
+   (SPEC §4). The vinyl isn't metal, so a second texture marks it as not shiny. The words use the page's Fraunces
+   once it has loaded. */
+function decal(g,w,h){
+  const cx=w/2,tw=w*.19;g.fillStyle='#141414';g.textAlign='center';g.textBaseline='alphabetic';
+  for(const [word,y] of [['BABY',.3],['TOSS',.45]]){g.font='900 200px Fraunces,Georgia,serif';const fs=200*tw/g.measureText(word).width;g.font=`900 ${fs}px Fraunces,Georgia,serif`;g.fillText(word,cx,h*y)}
+  const sc=tw*.72/100;g.save();g.translate(cx-50*sc,h*.49);g.scale(sc,sc);
+  g.fill(new Path2D($('#logo .logo-fill').getAttribute('d')));g.strokeStyle='#141414';g.lineWidth=6;g.lineCap=g.lineJoin='round';g.stroke(new Path2D($('#logo .logo-line').getAttribute('d')));g.restore();
+}
+function galvanized(c){
+  const w=2048,h=Math.round(w*c.h/(2*Math.PI*c.r*.93)); // same pixels per metre both ways, so the letters aren't stretched
+  const drawMap=(g)=>{wear(g,w,h,'#ffffff',{n:2400,col:()=>`rgba(${R(['120,120,120','255,255,255','140,120,90'])},${rand(.15,.4)})`},'rgba(90,75,50,.45)');
+    for(let x=0;x<w;x+=w/56){const sg=g.createLinearGradient(x,0,x+w/56,0);sg.addColorStop(0,'rgba(255,255,255,.07)');sg.addColorStop(.5,'rgba(0,0,0,.06)');sg.addColorStop(1,'rgba(255,255,255,.07)');g.fillStyle=sg;g.fillRect(x,0,w/56,h)} // faint corrugation
+    decal(g,w,h)};
+  const drawMask=(g)=>{g.fillStyle='#fff';g.fillRect(0,0,w,h);decal(g,w,h)};
+  const map=tex(w,h,drawMap),mask=tex(w,h,drawMask);mask.encoding=THREE.LinearEncoding;
+  try{document.fonts.load('900 100px Fraunces').then(()=>{for(const [t,d] of [[map,drawMap],[mask,drawMask]]){d(t.image.getContext('2d'));t.needsUpdate=true}}).catch(()=>{})}catch(e){}
+  return new THREE.MeshStandardMaterial({color:0xaeb4ba,metalness:.8,roughness:.42,map,metalnessMap:mask});
+}
 const CAN_LOOKS={
-  metal:()=>new THREE.MeshStandardMaterial({color:0xaeb4ba,metalness:.8,roughness:.42,map:scuffs('#ffffff',{n:500,col:()=>`rgba(${R(['120,120,120','255,255,255','140,120,90'])},${rand(.15,.4)})`},'rgba(90,75,50,.45)')}),
+  metal:galvanized,
   black:()=>new THREE.MeshStandardMaterial({color:0xffffff,roughness:.55,map:scuffs('#1c1c1f',{n:260,col:()=>`rgba(150,150,150,${rand(.08,.25)})`},'rgba(80,65,40,.5)')}),
   white:()=>new THREE.MeshStandardMaterial({color:0xffffff,roughness:.42,map:scuffs('#f2f1ec',{n:140,col:()=>`rgba(120,110,90,${rand(.08,.25)})`},'rgba(110,95,60,.4)')})
 };
@@ -333,18 +361,21 @@ const contactMap=tex(128,128,(g,w,h)=>{const rg=g.createRadialGradient(w/2,h/2,w
 function dent(geo,ang,y0,depth){const p=geo.attributes.position;for(let i=0;i<p.count;i++){const x=p.getX(i),z=p.getZ(i),y=p.getY(i),r=Math.hypot(x,z);if(r<.05)continue;let da=Math.atan2(x,z)-ang;da=Math.atan2(Math.sin(da),Math.cos(da));const k=depth*Math.exp(-(da*da)/.06-((y-y0)**2)/.006);p.setXYZ(i,x*(1-k/r),y,z*(1-k/r))}geo.computeVertexNormals()}
 function buildCan(c){
   const rb=c.r*.86,rt=c.r,h=c.h,wall=c.look==='metal'?.004:.007,out=[new THREE.Vector2(rb,.006)],ins=[];
-  if(c.look==='metal'){for(let i=1;i<=9;i++){const y=h*i/10,rr=rb+(rt-rb)*i/10;out.push(new THREE.Vector2(rr,y-.015),new THREE.Vector2(rr+.012,y),new THREE.Vector2(rr,y+.015))}}
+  const rAt=y=>rb+(rt-rb)*y/h,rib=y=>out.push(new THREE.Vector2(rAt(y),y-.012),new THREE.Vector2(rAt(y)+.012,y),new THREE.Vector2(rAt(y),y+.012));
+  if(c.look==='metal'){[.045,.09].forEach(rib);out.push(new THREE.Vector2(rAt(h-.15),h-.15));[h-.12,h-.075].forEach(rib)} // ribs near the bottom and top, like the real can
   out.push(new THREE.Vector2(rt,h-.02));
   for(let i=0;i<=8;i++){const y=.02+(h-.03)*i/8;ins.push(new THREE.Vector2(rb+(rt-rb)*(y/h)-wall,y))}
-  const g=new THREE.Group(),mat=CAN_LOOKS[c.look]();
-  const shell=new THREE.LatheGeometry(out,64),inner=new THREE.LatheGeometry(ins,64);
+  const g=new THREE.Group(),mat=CAN_LOOKS[c.look](c);
+  const shell=new THREE.LatheGeometry(out,64,-Math.PI),inner=new THREE.LatheGeometry(ins,64,-Math.PI); // texture centre faces the thrower
+  {const uv=shell.attributes.uv,pos=shell.attributes.position;for(let i=0;i<uv.count;i++)uv.setY(i,pos.getY(i)/h)} // texture height follows real height
   if(c.look==='metal'){dent(shell,2.2,h*.55,.012);dent(inner,2.2,h*.55,.012);dent(shell,-.9,h*.25,.008);dent(inner,-.9,h*.25,.008)}
   const body=new THREE.Mesh(shell,mat);body.castShadow=body.receiveShadow=true;g.add(body);
-  const im=mat.clone();im.side=THREE.BackSide;im.aoMap=insideMap;im.aoMapIntensity=1;im.lightMap=null;inner.setAttribute('uv2',inner.attributes.uv);
+  const im=mat.clone();im.side=THREE.BackSide;im.metalnessMap=null;if(c.look==='metal')im.map=null; // no lettering inside
+  im.aoMap=insideMap;im.aoMapIntensity=1;im.lightMap=null;inner.setAttribute('uv2',inner.attributes.uv);
   const inside=new THREE.Mesh(inner,im);inside.receiveShadow=true;g.add(inside);
   const floor=new THREE.Mesh(new THREE.CircleGeometry(rb-wall,48),new THREE.MeshStandardMaterial({color:0x111111,roughness:.9}));floor.rotation.x=-Math.PI/2;floor.position.y=.021;floor.receiveShadow=true;g.add(floor);
   const rim=new THREE.Mesh(new THREE.TorusGeometry(rt+.004,c.look==='metal'?.008:.012,10,64),mat);rim.rotation.x=Math.PI/2;rim.position.y=h-.004;rim.castShadow=true;g.add(rim);
-  if(c.look==='metal'){for(const s of [-1,1]){const hd=new THREE.Mesh(new THREE.TorusGeometry(.07,.012,8,16,Math.PI),mat);hd.position.set(s*(rt+.01),h*.82,0);hd.rotation.set(0,s>0?Math.PI/2:-Math.PI/2,0);hd.castShadow=true;g.add(hd)}}
+  if(c.look==='metal'){for(const s of [-1,1]){const hd=new THREE.Mesh(new THREE.TorusGeometry(.07,.012,8,16,Math.PI),mat);hd.position.set(s*(rt+.01),h*.82,0);hd.rotation.set(0,s>0?Math.PI/2:-Math.PI/2,0);hd.castShadow=true;g.add(hd);const clamp=new THREE.Mesh(new THREE.BoxGeometry(.03,.06,.1),mat);clamp.position.set(s*(rt+.004),h*.82,0);g.add(clamp)}}
   if(c.look==='white'){const hd=new THREE.Mesh(new THREE.TorusGeometry(rt,.006,6,32,Math.PI),new THREE.MeshStandardMaterial({color:0x9a9a9a,metalness:.8,roughness:.4}));hd.position.y=h;hd.rotation.set(0,0,.4);hd.castShadow=true;g.add(hd)}
   if(c.look==='black'){const band=new THREE.Mesh(new THREE.CylinderGeometry(rt+.006,rt+.006,.05,64,1,true),mat);band.position.y=h-.03;g.add(band)}
   const cs=new THREE.Mesh(new THREE.PlaneGeometry(rt*3.2,rt*3.2),new THREE.MeshBasicMaterial({map:contactMap,transparent:true,depthWrite:false}));cs.rotation.x=-Math.PI/2;cs.position.set(c.x,.004,c.z);scene.add(cs);

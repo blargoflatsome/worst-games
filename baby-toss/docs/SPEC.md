@@ -67,6 +67,10 @@ is the written version.
   windows, gutter and downspout on the house; trees and shrubs with bark and leafy crowns. The cans have dark
   insides and floors, rolled rims, scuffs, grime near the base and a soft shadow on the grass; the metal can has two
   small dents.
+- **The tall can is the user's real one** (user, 2026-11-27, from a photo): galvanized, with ribs near the top
+  and bottom and clamp handles on the sides, and "BABY TOSS" with the logo in black vinyl on the front. The orange
+  "SPLAT!" on the real can is left off. (Claude's call: the font is Fraunces at its heaviest and softest, the
+  closest free match to the can's lettering; the logo is Claude's tracing of the one on the can)
 - The back bucket is meant to be partly hidden: about a third of it is behind the tall can from the throwing spot.
 - The cans wobble a little when hit but never tip over. (user, 2026-11-27; may be revisited) In the game only the
   can's picture rocks; the can itself stays put, so a wobble never changes whether a baby is fully in. (Claude's call)
@@ -175,7 +179,7 @@ is the written version.
 - A hint explains swiping before the first throw of a game.
 
 ## 9. Screens
-- **Setup** (the first screen): name and tagline, a short version of the rules, players, Play to,
+- **Setup** (the first screen): the logo beside the name, in the can's lettering font (user, 2026-11-27), the tagline, a short version of the rules, players, Play to,
   Living babies, Sound, and Start tossing. The yard shows behind it with a few babies posed mid-game.
 - **Playing:** the current player, how many of their 3 babies are left, the scoreboard (every player's
   score, the round, the target, and the can values), and a settings button. On a narrow screen a long name ends
@@ -194,7 +198,11 @@ is the written version.
 - **Sound:** on/off, on by default. (Claude's call)
 - Both are on the Setup and Paused screens and are remembered on the device.
 
-## 12. Not in scope (for now)
+## 12. Phase 2 (later)
+- **Baby skins:** several looks for the babies, some unlocked by playing. (user, 2026-11-27) How they are unlocked
+  and chosen is to be decided when Phase 2 starts.
+
+## 12a. Not in scope (for now)
 - **Splat!**, the HORSE-style mode. (user, 2026-11-27)
 - Online play, accounts, high-score lists, app store versions.
 
