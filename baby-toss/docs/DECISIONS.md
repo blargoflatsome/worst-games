@@ -87,3 +87,6 @@ the end.
   faceted), and the eye sockets are unlit black so they read as holes.
 - 2026-11-27: Fixed the turn banner squeezing long names into a narrow column: a box centred at left 50% only got
   half the screen.
+- 2026-11-27: The throne was rebuilt after the user said the first one looked bad: padded satin with diamond tufting
+  and wrinkled shine, a pointed gothic arch with a stained border and turned spire, folded two-layer drapes,
+  tapering monster arms with talons hooked over the front corners, and skulls with brow, cheekbones and deep sockets.
