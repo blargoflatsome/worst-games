@@ -94,3 +94,6 @@ the end.
   a flat arched plywood board (not a pointed frame), a box cushion, six-button tufting, wing-like arms. (user)
 - 2026-11-27: The throne's skull looked sad and the little side skulls seemed to float (user): the side skulls are
   gone, and the skull is now one sculpted surface, pushed in and out with darker hollows, brows low in the middle.
+- 2026-11-27: Fixed the throne seat floating off the skull and 34 cm in front of the board (missed because only a
+  front view was checked). The skull is now squared off into a solid block base, wider than the seat. Throne
+  changes are now checked from the side as well as the front.
