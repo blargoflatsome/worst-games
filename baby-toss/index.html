@@ -127,8 +127,8 @@ h1{font-size:40px}
 <div class="overlay" id="menu">
   <form class="card" id="setup" novalidate>
     <div class="brand">
-      <!-- the logo from the user's can: a baby tossed into a wheelie bin with its lid open; the yard's tall can draws these same paths -->
-      <svg id="logo" class="logo" viewBox="0 0 100 100" aria-hidden="true" focusable="false"><path class="logo-fill" fill="currentColor" d="M50 56 L82 56 L78 96 L54 96 Z M47 51 L85 51 L85 57 L47 57 Z M84 93 a6 6 0 1 0 -12 0 a6 6 0 1 0 12 0 Z M82 52 Q90 34 92 12 L96 13 Q95 36 86 54 Z M70 30 a10 10 0 1 0 -20 0 a10 10 0 1 0 20 0 Z M52.5 29.9 A15 10 15 1 0 23.5 22.1 A15 10 15 1 0 52.5 29.9 Z M61 21 q3 -7 10 -5 q-2 6 -8 7 Z"/><path class="logo-line" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" d="M27 22 L16 9 M31 19 L28 5 M50 35 L53 48 M45 36 L42 48"/></svg>
+      <!-- the logo from the user's can: a baby tossed into a wheelie bin with its lid open; the yard's tall can draws these same paths, without the home screen's smaller baby -->
+      <svg id="logo" class="logo" viewBox="10 0 90 100" aria-hidden="true" focusable="false"><path class="logo-bin" fill="currentColor" d="M50 56 L82 56 L78 96 L54 96 Z M47 51 L85 51 L85 57 L47 57 Z M84 93 a6 6 0 1 0 -12 0 a6 6 0 1 0 12 0 Z M82 52 Q90 34 92 12 L96 13 Q95 36 86 54 Z"/><g transform="translate(33 23) scale(.74) translate(-40 -28)"><path class="logo-baby" fill="currentColor" d="M70 30 a10 10 0 1 0 -20 0 a10 10 0 1 0 20 0 Z M52.5 29.9 A15 10 15 1 0 23.5 22.1 A15 10 15 1 0 52.5 29.9 Z M61 21 q3 -7 10 -5 q-2 6 -8 7 Z"/><path class="logo-line" fill="none" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" d="M27 22 L16 9 M31 19 L28 5 M50 35 L53 48 M45 36 L42 48"/></g></svg>
       <h1>Baby Toss</h1>
     </div>
     <p class="tag">Kid Tested, Mother Approved!</p>
@@ -338,7 +338,7 @@ function decal(g,w,h){
   const cx=w/2,tw=w*.19;g.fillStyle='#141414';g.textAlign='center';g.textBaseline='alphabetic';
   for(const [word,y] of [['BABY',.3],['TOSS',.45]]){g.font='900 200px Fraunces,Georgia,serif';const fs=200*tw/g.measureText(word).width;g.font=`900 ${fs}px Fraunces,Georgia,serif`;g.fillText(word,cx,h*y)}
   const sc=tw*.72/100;g.save();g.translate(cx-50*sc,h*.49);g.scale(sc,sc);
-  g.fill(new Path2D($('#logo .logo-fill').getAttribute('d')));g.strokeStyle='#141414';g.lineWidth=6;g.lineCap=g.lineJoin='round';g.stroke(new Path2D($('#logo .logo-line').getAttribute('d')));g.restore();
+  for(const k of ['.logo-bin','.logo-baby'])g.fill(new Path2D($('#logo '+k).getAttribute('d')));g.strokeStyle='#141414';g.lineWidth=6;g.lineCap=g.lineJoin='round';g.stroke(new Path2D($('#logo .logo-line').getAttribute('d')));g.restore();
 }
 function galvanized(c){
   const w=2048,h=Math.round(w*c.h/(2*Math.PI*c.r*.93)); // same pixels per metre both ways, so the letters aren't stretched

@@ -79,3 +79,5 @@ the end.
   can from the same paths; the user can supply the original to replace it. The home screen shows the logo and uses
   the font for the name.
 - 2026-11-27: Phase 2 added to the spec: multiple baby skins, some unlockable (user).
+- 2026-11-27: On the home screen the logo's baby is drawn smaller and further from the bin, which reads better at
+  logo size; the can keeps the logo as drawn, which the user liked. (user)
