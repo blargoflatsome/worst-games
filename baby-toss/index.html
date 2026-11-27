@@ -649,43 +649,54 @@ const sfx={
     n.buffer=buf;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=1800;const g=ac.createGain();g.gain.value=.35;n.connect(f).connect(g).connect(ac.destination);n.start(t)},
   score(p){if(!settings.sound||!ac)return;const t=ac.currentTime,notes=p===0?[220,180]:p===1?[523]:p===2?[523,659]:[523,659,784,1047];notes.forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type=p?'triangle':'sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+i*.09);g.gain.linearRampToValueAtTime(.18,t+i*.09+.02);g.gain.exponentialRampToValueAtTime(.0001,t+i*.09+.35);o.connect(g).connect(ac.destination);o.start(t+i*.09);o.stop(t+i*.09+.4)})}
 };
-/* Crying (SPEC §10): every baby has its own voice (pitch, rasp, wobble), and each cry is one of several kinds,
-   chosen by how hard it was hit: wails, "wah-wah" bursts, gasping sobs, fussing, whimpers and screams. */
-const VOWEL={w:[350,800],u:[420,950],a:[950,1450],e:[620,1950],i:[420,2350]}; // two formant frequencies each
-const makeVoice=()=>({pitch:rand(330,560),rasp:rand(.04,.3),wobble:rand(4.5,8),depth:rand(.02,.06),bright:rand(.85,1.2)});
+/* Crying (SPEC §10). A baby's voice is a soft glottal tone (not a raw buzz) shaped by three vowel resonances, its
+   pitch rising then falling within each breath with a slight wobble; a little breath noise. It plays through the
+   yard: a touch of distance, a short echo, and a limiter so overlapping cries never clip. Every baby has its own
+   voice; each cry is one of a few kinds, chosen by what happened. */
+const VOWEL={w:[620,1150],u:[720,1300],a:[1100,1850],e:[820,2300],i:[520,2600]}; // first two resonances (Hz), a baby's
+const makeVoice=()=>({pitch:rand(400,540),breath:rand(.05,.18),wobble:rand(5,7.5),depth:rand(.01,.025),bright:rand(.93,1.1)});
 const CRIES={
-  wail:  v=>[{dur:rand(1,1.6),p:[.8,1.25,1.15,1.05,.7],vw:'wae',vol:.3}],
-  wahs:  v=>Array.from({length:2+Math.floor(Math.random()*3)},()=>({dur:rand(.22,.34),gap:rand(.08,.16),p:[.9,1.2,.85],vw:'wau',vol:.24})),
-  sobs:  v=>[{gasp:.18},{dur:.12,p:[1.3,1.45],vw:'ii',vol:.18,gap:.06},{dur:.1,p:[1.25,1.4],vw:'ii',vol:.16,gap:.1},{dur:rand(.7,1),p:[1.1,1.2,.9,.6],vw:'wae',vol:.28}],
-  fussy: v=>Array.from({length:3},(_,k)=>({dur:.2,gap:.06,p:[1,.92+k*.03,1.05],vw:'ee',vol:.14})),
-  whimper:v=>[{dur:rand(.45,.7),p:[1,.85,.7],vw:'uu',vol:.09}],
-  scream:v=>[{gasp:.12},{dur:rand(1,1.3),p:[1.3,1.75,1.65,1.4,1],vw:'aaea',vol:.36,rasp:2}]
+  yelp:  v=>[{dur:rand(.4,.55),p:[.92,1.3,1.18,1.0],vw:'wae',vol:.22}], // startled, as it leaves your hand
+  wail:  v=>[{dur:rand(.9,1.3),p:[.95,1.14,1.1,1.02,.84],vw:'waae',vol:.3},{gasp:.22},{dur:rand(.6,.9),p:[1,1.12,1.0,.82],vw:'waa',vol:.24}],
+  wahs:  v=>Array.from({length:2+Math.floor(Math.random()*2)},()=>({dur:rand(.3,.42),gap:rand(.12,.2),p:[.95,1.15,.9],vw:'wau',vol:.24})),
+  sobs:  v=>[{dur:.13,p:[1.15,1.22],vw:'ee',vol:.14,gap:.09},{dur:.12,p:[1.12,1.2],vw:'ee',vol:.13,gap:.12},{dur:rand(.8,1.1),p:[1,1.15,1.05,.8],vw:'waae',vol:.28}],
+  scream:v=>[{dur:rand(1,1.3),p:[1.1,1.38,1.33,1.22,1.02],vw:'aaea',vol:.32,breath:1.8},{gasp:.25},{dur:.7,p:[1.05,1.2,1.0,.85],vw:'waa',vol:.24}]
 };
-const cryKind=strength=>R(strength>=.9?['scream','wail','wail','sobs']:strength>=.5?['wail','wahs','sobs','fussy']:['whimper','fussy','whimper']);
+const cryKind=strength=>R(strength>=.9?['scream','wail','wail']:['wail','wahs','sobs']);
 function ramp(param,vals,t,dur){vals.forEach((x,k)=>{const at=t+dur*k/Math.max(1,vals.length-1);k?param.linearRampToValueAtTime(x,at):param.setValueAtTime(x,at)})}
-let noiseBuf=null;
-function noise(){if(!noiseBuf){noiseBuf=ac.createBuffer(1,ac.sampleRate,ac.sampleRate);const c=noiseBuf.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=Math.random()*2-1}const n=ac.createBufferSource();n.buffer=noiseBuf;n.loop=true;return n}
-// one breath of crying: the voice sliding through pitches and vowels, with rasp and wobble
+const audioKit=new WeakMap(); // per audio context: noise, the voice's wave shape, the yard bus
+function kit(){let k=audioKit.get(ac);if(k)return k;
+  const nb=ac.createBuffer(1,ac.sampleRate,ac.sampleRate),c=nb.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=Math.random()*2-1;
+  const H=36,re=new Float32Array(H),im=new Float32Array(H);for(let h=1;h<H;h++)im[h]=Math.pow(h,-1.45); // soft glottal tilt
+  const inp=ac.createGain(),lp=ac.createBiquadFilter(),dry=ac.createGain(),wet=ac.createGain(),rev=ac.createConvolver(),comp=ac.createDynamicsCompressor(),out=ac.createGain();
+  lp.type='lowpass';lp.frequency.value=4200;lp.Q.value=.5;
+  const len=Math.floor(ac.sampleRate*.6),ir=ac.createBuffer(2,len,ac.sampleRate);for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,4)}rev.buffer=ir;
+  dry.gain.value=.85;wet.gain.value=.18;comp.threshold.value=-20;comp.knee.value=8;comp.ratio.value=6;comp.attack.value=.004;comp.release.value=.2;out.gain.value=.75;
+  inp.connect(lp);lp.connect(dry);lp.connect(rev);rev.connect(wet);dry.connect(comp);wet.connect(comp);comp.connect(out);out.connect(ac.destination);
+  k={noise:nb,wave:ac.createPeriodicWave(re,im),bus:inp};audioKit.set(ac,k);return k}
+function noiseSrc(){const n=ac.createBufferSource();n.buffer=kit().noise;n.loop=true;return n}
+// one breath of crying
 function voiceNote(v,t,n,rec){
-  const out=ac.createGain(),f1=ac.createBiquadFilter(),f2=ac.createBiquadFilter(),lfo=ac.createOscillator(),lg=ac.createGain(),src=[ac.createOscillator(),ac.createOscillator(),noise()],ng=ac.createGain(),vol=n.vol*(.9+Math.random()*.2);
-  src[0].type='sawtooth';src[1].type='square';src[1].detune.value=rand(-14,14);
-  for(const o of src.slice(0,2)){ramp(o.frequency,n.p.map(x=>x*v.pitch),t,n.dur);lg.connect(o.frequency);o.connect(f1);o.connect(f2)}
-  lfo.frequency.value=v.wobble;lg.gain.value=v.pitch*v.depth;lfo.connect(lg);
-  ng.gain.value=v.rasp*(n.rasp||1)*.5;src[2].connect(ng);ng.connect(f1);ng.connect(f2);
-  f1.type=f2.type='bandpass';f1.Q.value=6;f2.Q.value=8;const vw=[...n.vw];
-  ramp(f1.frequency,vw.map(c=>VOWEL[c][0]*v.bright),t,n.dur);ramp(f2.frequency,vw.map(c=>VOWEL[c][1]*v.bright),t,n.dur);
-  out.gain.setValueAtTime(0,t);out.gain.linearRampToValueAtTime(vol,t+.04);out.gain.setValueAtTime(vol*.85,t+n.dur*.8);out.gain.linearRampToValueAtTime(0,t+n.dur);
-  f1.connect(out);f2.connect(out);out.connect(ac.destination);
-  for(const o of [...src,lfo]){o.start(t);o.stop(t+n.dur+.05);rec.push(o)}
+  const K=kit(),o=ac.createOscillator(),lfo=ac.createOscillator(),lg=ac.createGain(),nz=noiseSrc(),hp=ac.createBiquadFilter(),ng=ac.createGain(),env=ac.createGain(),vol=n.vol*rand(.9,1.1);
+  o.setPeriodicWave(K.wave);ramp(o.frequency,n.p.map(x=>x*v.pitch*rand(.985,1.015)),t,n.dur);
+  lfo.frequency.value=v.wobble;lg.gain.value=v.pitch*v.depth;lfo.connect(lg);lg.connect(o.frequency);
+  hp.type='highpass';hp.frequency.value=1800;ng.gain.value=v.breath*(n.breath||1)*.35;nz.connect(hp);hp.connect(ng);
+  const vw=[...n.vw],F=[0,1,2].map(()=>ac.createBiquadFilter());
+  F.forEach((f,k)=>{f.type='peaking';f.Q.value=[2.4,3,3.5][k];f.gain.value=[12,9,5][k]});
+  ramp(F[0].frequency,vw.map(c=>VOWEL[c][0]*v.bright),t,n.dur);ramp(F[1].frequency,vw.map(c=>VOWEL[c][1]*v.bright),t,n.dur);F[2].frequency.value=3300*v.bright;
+  o.connect(F[0]);ng.connect(F[0]);F[0].connect(F[1]);F[1].connect(F[2]);F[2].connect(env);env.connect(K.bus);
+  env.gain.setValueAtTime(0,t);env.gain.linearRampToValueAtTime(vol,t+.07);env.gain.linearRampToValueAtTime(vol*.8,t+n.dur*.75);env.gain.linearRampToValueAtTime(0,t+n.dur);
+  for(const x of [o,lfo,nz]){x.start(t);x.stop(t+n.dur+.05);rec.push(x)}
 }
-function gasp(t,dur,rec){const n=noise(),f=ac.createBiquadFilter(),g=ac.createGain();f.type='bandpass';f.frequency.setValueAtTime(900,t);f.frequency.linearRampToValueAtTime(2600,t+dur);f.Q.value=1.5;
-  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.08,t+dur*.8);g.gain.linearRampToValueAtTime(0,t+dur);n.connect(f).connect(g).connect(ac.destination);n.start(t);n.stop(t+dur+.02);rec.push(n)}
+// the quick breath in between cries
+function gasp(t,dur,rec){const n=noiseSrc(),f=ac.createBiquadFilter(),g=ac.createGain();f.type='bandpass';f.frequency.setValueAtTime(1600,t);f.frequency.linearRampToValueAtTime(2800,t+dur);f.Q.value=2.5;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.035,t+dur*.7);g.gain.linearRampToValueAtTime(0,t+dur);n.connect(f);f.connect(g);g.connect(kit().bus);n.start(t);n.stop(t+dur+.02);rec.push(n)}
 function cry(d,strength,kind){
-  d.cryCD=1.8;if(!settings.alive)return;
-  if(!settings.sound||!ac){d.crying=Math.max(d.crying,.6+strength*1.4);return}
+  kind=kind||cryKind(strength);d.cryCD=kind==='yelp'?.35:1.8;if(!settings.alive)return;
+  if(!settings.sound||!ac){d.crying=Math.max(d.crying,kind==='yelp'?.5:1.2);return}
   const v=d.voice||(d.voice=makeVoice()),rec=[];let t=ac.currentTime+.02;
-  for(const n of CRIES[kind||cryKind(strength)](v)){if(n.gasp){gasp(t,n.gasp,rec);t+=n.gasp+.02;continue}voiceNote(v,t,n,rec);t+=n.dur+(n.gap||0)}
-  d.crying=Math.max(d.crying,t-ac.currentTime);crying.add(rec);rec[0].onended=null;setTimeout(()=>crying.delete(rec),(t-ac.currentTime+.2)*1000);
+  for(const n of CRIES[kind](v)){if(n.gasp){gasp(t,n.gasp,rec);t+=n.gasp+.03;continue}voiceNote(v,t,n,rec);t+=n.dur+(n.gap||0)}
+  d.crying=Math.max(d.crying,t-ac.currentTime);crying.add(rec);setTimeout(()=>crying.delete(rec),(t-ac.currentTime+.2)*1000);
 }
 function hush(){crying.forEach(rec=>rec.forEach(o=>{try{o.stop()}catch(e){}}));crying.clear();dolls.forEach(d=>d.crying=0)}
 
@@ -729,7 +740,7 @@ function doThrow(){
   audio();const sc=grip.scatter,yaw=aim.yaw+rand(-1,1)*sc,pitch=grip.pitch+rand(-1,1)*sc*.7;
   const v=launchVel(yaw,pitch,1+rand(-1,1)*sc*.8),{P,Q}=heldPose(aim.power,clock.elapsedTime);
   const omega=new THREE.Vector3(...grip.spin).multiplyScalar(rand(.85,1.15)).applyAxisAngle(UP,-yaw);
-  const d=spawnDoll(P,Q,v,omega,held.look);d.state='flying';d.grip=grip;d.yaw=yaw;S.flying=d;
+  const d=spawnDoll(P,Q,v,omega,held.look);d.state='flying';d.grip=grip;d.yaw=yaw;S.flying=d;cry(d,.5,'yelp');
   held.g.visible=false;showGuide(false);aim.active=false;$('#grips').hidden=true;
   S.left--;S.first=false;$('#hint').hidden=true;S.phase='flying';hud();
 }
@@ -761,7 +772,7 @@ function resolvePending(){
   const P=S.pending;S.pending=null;const r=addPoints(P.pts);
   const note=r==='bust'?MSG.backTo(S.turnStart):r==='target'?MSG.rightOn(setup.target):P.pts&&P.late?MSG.lateIn:!P.pts&&P.over?MSG.over:'';
   call(r==='bust'?MSG.bust:MSG.pts(P.pts),note);
-  sfx.score(r==='bust'?0:P.pts);if(settings.alive)P.scored.forEach(d=>setTimeout(()=>cry(d,.6),500));
+  sfx.score(r==='bust'?0:P.pts);if(settings.alive)P.scored.forEach(d=>setTimeout(()=>{if(d.crying<=0)cry(d,.6)},500)); // unless it's still crying from the landing
   if(r)endTurnEarly();
   hud();
 }
@@ -854,7 +865,7 @@ function eyeOpen(b,i){
 }
 function lifeTick(d,dt){
   d.cryCD-=dt;d.crying=Math.max(0,d.crying-dt);d.agit=Math.max(.12,d.agit-dt*.25);
-  if(settings.alive&&d!==S.flying&&d.agit<=.13&&d.age>2){d.nextWhimper-=dt;if(d.nextWhimper<=0){d.nextWhimper=rand(6,12);d.agit=.6;if(Math.random()<.5)cry(d,.35)}}
+  if(settings.alive&&d!==S.flying&&d.agit<=.13&&d.age>2){d.nextWhimper-=dt;if(d.nextWhimper<=0){d.nextWhimper=rand(6,12);d.agit=.6}} // a quiet wriggle now and then: idle babies don't cry
 }
 function frame(){
   const raw=clock.getDelta(),dt=Math.min(raw,.05),t=clock.elapsedTime;watchSpeed(raw);grassTime.value=t;

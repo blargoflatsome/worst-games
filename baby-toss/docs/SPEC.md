@@ -83,8 +83,8 @@ is the written version.
   - Vinyl parts bounce and clack off the cans; the stuffed body thuds and barely bounces. So how a baby lands
     matters to whether it stays in.
 - **Living babies** (setting, on by default): in the game the babies move and cry as if alive. They kick and flail,
-  open their mouths and cry when they hit something hard, sometimes whimper while lying in the yard, and cry when
-  they land in a can. The baby in your hand blinks now and then, and sometimes slowly shuts its left eye and then its
+  give a startled cry as they're tossed, open their mouths and cry when they land hard, and cry when they land in a can.
+  Lying in the yard they may wriggle now and then but stay quiet. (user, 2026-11-27: no crying while idle) The baby in your hand blinks now and then, and sometimes slowly shuts its left eye and then its
   right, in a creepy way. (user, 2026-11-27; tied to Living babies because blinking is acting alive: Claude's call)
   With it off they are only dolls: no movement of their own, no crying. (user; the details are
   Claude's call)
@@ -197,9 +197,11 @@ is the written version.
 ## 10. Sound (Claude's call)
 - Thuds on grass, clangs on the metal can, softer thumps for the stuffed body, a short tune for points, fireworks
   whistles and bangs, and the babies' cries (Living babies only).
-- **Cries vary** (user, 2026-11-27): each baby has its own voice (pitch, rasp, wobble), and each cry is one of six
-  kinds picked by how hard it was hit: a scream, wail or gasping sobs for a hard hit; a wail, "wah-wah" bursts, sobs
-  or fussing on landing in a can; whimpers or fussing while lying in the yard. (Claude's call: the kinds and voices) All made by the page; no sound files.
+- **Cries vary** (user, 2026-11-27): each baby has its own voice (pitch, breathiness, wobble), and each cry is one of
+  a few kinds: a short startled "waah!" when tossed; a scream or a wail with a breath in between for a hard landing;
+  a wail, "wah-wah" bursts or hiccuping sobs on landing in a can. They should sound like a baby out in the yard, not
+  close to a microphone: a soft voice with baby vowels, a little distance and echo, and never clipped. (user asked for
+  cleaner, more baby-like cries; Claude's call: how they're made) All made by the page; no sound files.
 - Sound has its own on/off setting, on by default.
 
 ## 11. Settings

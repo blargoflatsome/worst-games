@@ -104,3 +104,7 @@ the end.
   Cries are built from a per-baby voice and six patterns (Claude's call).
 - 2026-11-27: Fixed the held baby keeping one look all game (it was made once at page load); now every toss is a new
   baby, and the thrown baby keeps the held baby's look instead of getting a random one (user).
+- 2026-11-27: Cries rebuilt after the user said they sounded harsh, too close and not like babies: a soft glottal
+  tone through three vowel resonances (instead of sawtooth and square through narrow bandpass filters), baby pitch
+  contours, less breath noise, a little distance and echo, and a limiter. Babies no longer cry while lying idle (the
+  quiet wriggle stays); they give a short startled cry when tossed (user).
