@@ -116,8 +116,8 @@ is the written version.
 - At the end of a round, if exactly one player is on the target, they win. If none is, play goes on to the next round.
   (user)
 - **Tiebreak:** if more than one player is on the target at the end of a round, those players each take one tiebreak
-  turn of 3 babies. The most points in that turn wins; there is no target or bust in a tiebreak. Late ins count as in any turn. If they're still
-  tied, they take another tiebreak turn, until one leads. (user, 2026-11-27)
+  turn of 3 babies. The most points in that turn wins; there is no target or bust in a tiebreak. Late ins count as
+  in any turn. If they're still tied, they take another tiebreak turn, until one leads. (user, 2026-11-27)
 
 ## 7. Grips
 - Before each throw the player picks how to hold the baby. **Every grip is a valid way to throw, and each has
