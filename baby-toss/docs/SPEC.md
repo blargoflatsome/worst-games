@@ -43,6 +43,10 @@ is the written version.
 - Playable link: published as a private claude.ai Artifact
   (https://claude.ai/artifact/5kRh1GF6sBmgAuCuHN92g6), which the user can share. Code lives in the
   `blargoflatsome/worst-games` repo.
+- **Graphics quality drops by itself** on a device that can't keep up (user, 2026-11-27): if frames average slower
+  than 1/40 s over 2 s, it first lowers the resolution and softens the shadows, then removes the grass blades. It
+  never steps back up during a visit, so the picture doesn't keep changing. No setting. (Claude's call: the steps
+  and the threshold)
 - Nothing is sent anywhere. The device remembers only the settings (§11) and the last setup (players and
   target).
 
@@ -57,6 +61,12 @@ is the written version.
 | Back bucket | **5** | Very small, hard to see behind the tall can | White plastic bucket with a wire handle, 19 cm radius, 40 cm tall, about 7.5 m away, partly hidden behind the tall can |
 
 - The fence is about 9 m away and 1.9 m tall. A baby that goes over it scores 0 ("Over the fence!"). (Claude's call)
+- **Looks** (user asked for more realism, 2026-11-27; details Claude's call): a sky with soft clouds that also
+  lights the yard and shows in the shiny cans; a lawn with slow colour patches, clover and real swaying grass blades
+  where the game is played; dog-eared cedar fence planks with knots, nails and weathering; a shingled roof, trimmed
+  windows, gutter and downspout on the house; trees and shrubs with bark and leafy crowns. The cans have dark
+  insides and floors, rolled rims, scuffs, grime near the base and a soft shadow on the grass; the metal can has two
+  small dents.
 - The back bucket is meant to be partly hidden: about a third of it is behind the tall can from the throwing spot.
 - The cans wobble a little when hit but never tip over. (user, 2026-11-27; may be revisited) In the game only the
   can's picture rocks; the can itself stays put, so a wobble never changes whether a baby is fully in. (Claude's call)
@@ -72,7 +82,10 @@ is the written version.
   open their mouths and cry when they hit something hard, sometimes whimper while lying in the yard, and cry when
   they land in a can. With it off they are only dolls: no movement of their own, no crying. (user; the details are
   Claude's call)
-- **Looks** (Claude's call): footed onesies in a few pastel colours, painted eyes, rosy cheeks, a little hair.
+- **Looks** (Claude's call, made more realistic at the user's request 2026-11-27): glossy vinyl skin; knit onesies
+  in a few pastel colours, plain, dotted or striped; painted eyes with a highlight, brows, a button nose, ears, rosy
+  cheeks and painted hair with a curl; chubby arms with mitten hands; a neck and waist that follow the ragdoll's
+  bends. Looks only: the physics shapes and sizes are unchanged.
 - Babies stay where they land for the rest of the turn, so later babies can hit them. The yard is cleared between
   turns. (user, 2026-11-27)
 

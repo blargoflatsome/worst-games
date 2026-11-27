@@ -58,3 +58,10 @@ the end.
   thought pressing over a can should aim at it. The line has a fixed length, so it still never shows the landing
   spot. (user asked for clearer aiming; Claude's design)
 - 2026-11-27: Pull back with the aim line on the grass feels good; the backswing-and-toss fallback is dropped. (user)
+- 2026-11-27: More realistic graphics for the yard and light, the babies and the cans (user picked those three, not
+  camera effects); quality drops by itself on slow devices, with no setting (user). Built with the three.js r128
+  already loaded, no add-on files: the sky dome is also the light and reflection source; grass blades are one
+  instanced mesh that doesn't write depth (drawn far to near) so the aim line stays visible over it. Colours picked
+  by eye are now converted to linear, which fixed babies looking washed out. A frame slower than 0.5 s was first
+  ignored as a tab switch, which would have stopped a very slow phone ever dropping detail; now only the first
+  frame back from a hidden tab is ignored.
