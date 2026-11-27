@@ -35,8 +35,6 @@ h1{margin:0;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em;c
 .prow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .prow input{flex:1;height:44px;border:2px solid var(--line);border-radius:12px;padding:0 12px;background:#fff;font-size:16px}
 .prow input:focus{border-color:var(--lav);outline:none}
-.team{height:44px;border:0;border-radius:12px;padding:0 12px;font-weight:800;white-space:nowrap;color:#fff}
-.t0{background:#ff6a3d}.t1{background:#2f8cff}
 .x{width:44px;height:44px;border:2px solid var(--line);border-radius:12px;background:#fff;font-size:20px;line-height:1;color:var(--muted)}
 .x:disabled{opacity:.35;cursor:default}
 .ghost{height:44px;border:2px dashed var(--lav);border-radius:12px;background:transparent;color:#6a4fd6;font-weight:800;width:100%}
@@ -122,8 +120,7 @@ h1{font-size:40px}
   <form class="card" id="setup" novalidate>
     <h1 class="slab">Baby Toss</h1>
     <p class="tag">Kid Tested, Mother Approved!</p>
-    <p class="rules">Everyone gets <b>3 babies</b> a turn. A baby only counts if it's <b>fully in</b> the can. Front can <b>2</b>, tall can <b>1</b>, the little bucket hiding at the back <b>5</b>. Hit the target <b>exactly</b>: go over and you bust, back to your score from the start of that turn. The round always finishes, so everyone gets the same number of turns. Hold each baby by the head, a hand, a foot, both feet, or overhand by the body. Each throws differently.</p>
-    <div class="opt" style="border-top:0;padding-top:0"><label for="teams">Teams<small>Split players into two teams</small></label><input type="checkbox" class="sw" id="teams"></div>
+    <p class="rules">Everyone gets <b>3 babies</b> a turn. A baby only counts if it's <b>fully in</b> the can. Front can <b>2</b>, tall can <b>1</b>, the little bucket hiding at the back <b>5</b>. A baby knocked in later in the turn counts then. Hit the target <b>exactly</b>: go over and you bust, back to your score from the start of that turn. The round always finishes, so everyone gets the same number of turns. Hold each baby by the head, a hand, a foot, both feet, or overhand by the body. Each throws differently.</p>
     <div class="sec">Players</div>
     <div id="players"></div>
     <button type="button" class="ghost" id="addP">+ Add player</button>
@@ -159,12 +156,22 @@ h1{font-size:40px}
 const $=s=>document.querySelector(s);
 const store={get(k,d){try{const v=localStorage.getItem('babytoss:'+k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem('babytoss:'+k,JSON.stringify(v))}catch(e){}}};
 const settings=Object.assign({alive:true,sound:true},store.get('settings',{}));
-let setup=Object.assign({teams:false,target:20,players:[{name:'Player 1',team:0},{name:'Player 2',team:1}]},store.get('setup',{}));
+let setup=Object.assign({target:20,players:[{name:'Player 1'},{name:'Player 2'}]},store.get('setup',{}));
+setup={target:setup.target,players:setup.players.map(p=>({name:String(p.name??'')}))}; // drops the old teams setting
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const rand=(a,b)=>a+Math.random()*(b-a);
-const TEAM_NAMES=['Team Orange','Team Blue'];
+// the page's messages (fixed text is in the markup)
+const MSG={
+  no3d:'The 3D engine did not load. Check your connection and reload.',
+  turn:n=>n+"'s turn",babies3:'3 babies',tiebreak:'Tiebreak: most points this turn',
+  tiebreakStart:'Tiebreak! Most points this turn',stillTied:'Still tied! Most points this turn',
+  pts:p=>p===1?'1 PT':p+' PTS',bust:'BUST!',backTo:s=>'Back to '+s,rightOn:t=>`Right on ${t}!`,
+  over:'Over the fence!',lateIn:'Late in!',wins:n=>n+' wins!',babiesLeft:n=>n+' babies left',
+  round:(r,t)=>`Round ${r} · exactly ${t}`,tbBoard:'Tiebreak · most points',canValues:'Front 2 · Tall 1 · Bucket 5',
+  noPlayers:'Add at least one player.',playerName:i=>`Player ${i} name`,remove:n=>'Remove '+n
+};
 
-if(!window.THREE||!window.CANNON){document.body.insertAdjacentHTML('beforeend','<div id="err3d">The 3D engine did not load. Check your connection and reload.</div>');throw new Error('libs missing')}
+if(!window.THREE||!window.CANNON){document.body.insertAdjacentHTML('beforeend','<div id="err3d"></div>');$('#err3d').textContent=MSG.no3d;throw new Error('libs missing')}
 
 /* ---------- renderer & scene ---------- */
 const canvas=$('#scene');
@@ -253,8 +260,12 @@ function buildCan(c){
   const b=new CANNON.Body({mass:0,material:c.mat}),N=20,t=.05,pr=(rb+rt)/2+t/2,seg=2*Math.PI*pr/N*.6;
   for(let i=0;i<N;i++){const a=i/N*Math.PI*2,q=new CANNON.Quaternion();q.setFromAxisAngle(new CANNON.Vec3(0,1,0),a);b.addShape(new CANNON.Box(new CANNON.Vec3(seg,h/2,t/2)),new CANNON.Vec3(Math.sin(a)*pr,h/2,Math.cos(a)*pr),q)}
   b.addShape(new CANNON.Box(new CANNON.Vec3(rb,.02,rb)),new CANNON.Vec3(0,.01,0));
-  b.position.set(c.x,0,c.z);world.addBody(b);c.inner=rt+.005;
+  b.position.set(c.x,0,c.z);b.can=c;world.addBody(b);Object.assign(c,{inner:rt+.005,g,w:[0,0],wv:[0,0]});
 }
+// Cans wobble a little when hit but never tip (SPEC §4): only the drawing rocks; the physics can stays put,
+// so the fully-in check is unchanged by a wobble.
+function wobble(c,v,iv){const h=Math.hypot(v.x,v.z)||1,k=Math.min(.6,iv*.11);c.wv[0]+=v.z/h*k;c.wv[1]-=v.x/h*k}
+function rockCans(dt){for(const c of CANS){for(const i of [0,1]){c.wv[i]+=(-196*c.w[i]-7*c.wv[i])*dt;c.w[i]=Math.max(-.05,Math.min(.05,c.w[i]+c.wv[i]*dt))}c.g.rotation.set(c.w[0],0,c.w[1])}}
 CANS.forEach(buildCan);
 
 /* ---------- the doll: a ragdoll ----------
@@ -322,13 +333,13 @@ function drawBodies(d){
 const dolls=[];
 function spawnDoll(P,Q,vel,omega){
   const v=dollVisual(),com=new THREE.Vector3(0,.03,0).applyQuaternion(Q).add(P);
-  const d={v,age:0,still:0,agit:vel?1:0,phase:Math.random()*9,cryCD:0,crying:0,nextWhimper:rand(4,9),landed:!vel,grip:null};
+  const d={v,age:0,still:0,agit:vel?1:0,phase:Math.random()*9,cryCD:0,crying:0,nextWhimper:rand(4,9),landed:!vel,grip:null,state:'pose'};
   d.bodies=PART_DEF.map(def=>{
     const b=new CANNON.Body({mass:def.mass,material:M[def.mat],linearDamping:.03,angularDamping:.35});
     def.shapes.forEach(([o,r])=>b.addShape(new CANNON.Sphere(r),V3(o)));
     const wp=new THREE.Vector3(...def.pos).applyQuaternion(Q).add(P);b.position.set(wp.x,wp.y,wp.z);b.quaternion.set(Q.x,Q.y,Q.z,Q.w);
     if(vel){const w=omega.clone().cross(wp.clone().sub(com)).add(vel);b.velocity.set(w.x,w.y,w.z);b.angularVelocity.set(omega.x,omega.y,omega.z)}
-    b.addEventListener('collide',e=>{const iv=Math.abs(e.contact.getImpactVelocityAlongNormal());if(e.body.material!==M.vinyl&&e.body.material!==M.stuffed)d.landed=true;if(iv<1)return;sfx.impact(e.body.material,iv,def.mat==='stuffed');if(iv>2.2){d.agit=1;if(d.cryCD<=0)cry(d,1)}});
+    b.addEventListener('collide',e=>{const iv=Math.abs(e.contact.getImpactVelocityAlongNormal());if(e.body.material!==M.vinyl&&e.body.material!==M.stuffed)d.landed=true;if(iv<1)return;if(e.body.can)wobble(e.body.can,b.velocity,iv);sfx.impact(e.body.material,iv,def.mat==='stuffed');if(iv>2.2){d.agit=1;if(d.cryCD<=0)cry(d,1)}});
     world.addBody(b);return b;
   });
   d.cons=JOINTS.map(j=>{const c=new CANNON.PointToPointConstraint(d.bodies[j.a],V3(sub3(j.piv,PART_DEF[j.a].pos)),d.bodies[j.b],V3(sub3(j.piv,PART_DEF[j.b].pos)));c.collideConnected=false;world.addConstraint(c);return c});
@@ -351,14 +362,13 @@ world.addEventListener('preStep',()=>{
     if(settings.alive&&d.agit>.13){ // living babies kick and flail
       for(let i=3;i<7;i++){const b=d.bodies[i],ph=d.phase+t*(7+d.agit*8)+i*1.7,a=d.agit*(i<5?.22:.3);_f.set(Math.sin(ph)*a,Math.cos(ph*1.3)*a,Math.sin(ph*.7)*a);b.applyForce(_f,b.position)}
     }
-    if(d===S.cur&&!d.landed&&d.grip&&d.grip.curve){const tot=.47*9.82*d.grip.curve;_f.set(Math.cos(d.yaw)*tot,0,Math.sin(d.yaw)*tot);d.bodies[1].applyForce(_f,d.bodies[1].position)}
+    if(d===S.flying&&!d.landed&&d.grip&&d.grip.curve){const tot=.47*9.82*d.grip.curve;_f.set(Math.cos(d.yaw)*tot,0,Math.sin(d.yaw)*tot);d.bodies[1].applyForce(_f,d.bodies[1].position)}
   }
 });
+// Fully in (SPEC §6): every part of the baby, its whole size included, is inside the can and below the rim.
 function canFor(d){
-  for(const c of CANS){let all=true;
-    for(const b of d.bodies){for(let k=0;k<b.shapes.length&&all;k++){b.pointToWorldFrame(b.shapeOffsets[k],_cv);const r=b.shapes[k].radius,dx=_cv.x-c.x,dz=_cv.z-c.z;if(dx*dx+dz*dz>c.inner*c.inner||_cv.y+r*.5>c.h+.005)all=false}if(!all)break}
-    if(all)return c}
-  return null;
+  const inside=(c,b,k)=>{b.pointToWorldFrame(b.shapeOffsets[k],_cv);const r=b.shapes[k].radius,dx=_cv.x-c.x,dz=_cv.z-c.z,rr=c.inner-r;return dx*dx+dz*dz<=rr*rr&&_cv.y+r<=c.h+.01};
+  return CANS.find(c=>d.bodies.every(b=>b.shapes.every((_,k)=>inside(c,b,k))))||null;
 }
 const coreSpeed=d=>Math.max(...CORE.map(i=>d.bodies[i].velocity.length()));
 
@@ -406,23 +416,38 @@ function cry(d,strength){
 }
 function hush(){crying.forEach(r=>{try{r.o.stop();r.lfo.stop()}catch(e){}});crying.clear();dolls.forEach(d=>d.crying=0)}
 
-/* ---------- game state ---------- */
-// Rules: 3 babies a turn; hit the target exactly (points that would go over don't count);
-// the round always finishes so everyone gets the same number of turns.
-const S={phase:'menu',sides:[],side:0,pos:0,round:0,tb:null,player:null,left:3,cur:null,wait:0,paused:false,first:true};
-function buildSides(){
-  const ps=setup.players.map(p=>({name:p.name.trim()||'Player',team:p.team,grip:'head'}));
-  if(setup.teams)return [0,1].map(t=>({name:TEAM_NAMES[t],team:t,members:ps.filter(p=>p.team===t),score:0}));
-  return ps.map(p=>({name:p.name,members:[p],score:0}));
+/* ---------- game state ----------
+   The rules (SPEC §6) are plain functions on S: they never touch three.js. */
+const S={phase:'menu',players:[],turn:0,pos:0,round:0,tb:null,left:3,turnStart:0,flying:null,pending:null,wait:0,paused:false,first:true};
+const current=()=>S.players[S.turn];
+const order=()=>S.tb?S.tb.players:S.players.map((_,i)=>i);
+// Adds points to the current turn. Babies that land at the same moment arrive here as one sum (SPEC §6 Scoring).
+// Returns 'bust', 'target' or null; a bust or reaching the target ends the turn.
+function addPoints(pts){
+  const p=current();
+  if(S.tb){S.tb.pts[S.turn]=(S.tb.pts[S.turn]||0)+pts;return null}
+  if(!pts)return null;
+  if(p.score+pts>setup.target){p.score=S.turnStart;return 'bust'}
+  p.score+=pts;return p.score===setup.target?'target':null;
 }
-const order=()=>S.tb?S.tb.sides:S.sides.map((_,i)=>i);
+// After each turn: the next player, or the round is over (everyone has had the same number of turns).
+// Returns {winner} or {next, sub}.
+function nextTurn(){
+  const ord=order();S.pos++;
+  if(S.pos<ord.length)return {next:ord[S.pos]};
+  let sub;
+  if(S.tb){const best=Math.max(...S.tb.players.map(i=>S.tb.pts[i]||0)),lead=S.tb.players.filter(i=>(S.tb.pts[i]||0)===best);if(lead.length===1)return {winner:lead[0]};S.tb={players:lead,pts:{}};sub=MSG.stillTied}
+  else{const hit=S.players.map((p,i)=>p.score===setup.target?i:-1).filter(i=>i>=0);if(hit.length===1)return {winner:hit[0]};if(hit.length>1){S.tb={players:hit,pts:{}};sub=MSG.tiebreakStart}}
+  S.round++;S.pos=0;return {next:order()[0],sub};
+}
 function startGame(){
-  S.sides=buildSides();S.pos=0;S.side=0;S.round=0;S.tb=null;S.first=true;$('#menu').hidden=true;$('#over').hidden=true;$('#hud').hidden=false;startTurn();
+  S.players=setup.players.map(p=>({name:p.name.trim()||'Player',grip:'head',score:0}));
+  S.pos=0;S.turn=0;S.round=0;S.tb=null;S.first=true;$('#menu').hidden=true;$('#over').hidden=true;$('#hud').hidden=false;startTurn();
 }
 function startTurn(sub){
-  clearDolls();hush();const side=S.sides[S.side];S.player=side.members[S.round%side.members.length];S.left=3;S.turnStart=side.score;
-  grip=GRIPS.find(g=>g.id===S.player.grip)||GRIPS[0];renderGrips();
-  $('#bannerName').textContent=S.player.name+"'s turn";$('#bannerSub').textContent=sub||(S.tb?'Tiebreak: most points this turn':setup.teams?side.name:'3 babies');$('#banner').hidden=false;
+  clearDolls();hush();S.pending=null;S.flying=null;const p=current();S.left=3;S.turnStart=p.score;
+  grip=GRIPS.find(g=>g.id===p.grip)||GRIPS[0];renderGrips();
+  $('#bannerName').textContent=MSG.turn(p.name);$('#bannerSub').textContent=sub||(S.tb?MSG.tiebreak:MSG.babies3);$('#banner').hidden=false;
   S.phase='banner';S.wait=1.4;hud();
 }
 function readyThrow(){S.phase='aim';aim.yaw=0;aim.power=0;held.g.visible=true;$('#grips').hidden=false;$('#hint').hidden=!S.first;hud()}
@@ -431,52 +456,65 @@ function doThrow(){
   audio();const sc=grip.scatter,yaw=aim.yaw+rand(-1,1)*sc,pitch=grip.pitch+rand(-1,1)*sc*.7;
   const v=launchVel(yaw,pitch,1+rand(-1,1)*sc*.8),{P,Q}=heldPose(aim.power,clock.elapsedTime);
   const omega=new THREE.Vector3(...grip.spin).multiplyScalar(rand(.85,1.15)).applyAxisAngle(UP,-yaw);
-  S.cur=spawnDoll(P,Q,v,omega);S.cur.grip=grip;S.cur.yaw=yaw;
+  const d=spawnDoll(P,Q,v,omega);d.state='flying';d.grip=grip;d.yaw=yaw;S.flying=d;
   held.g.visible=false;showGuide(false);aim.active=false;$('#grips').hidden=true;
   S.left--;S.first=false;$('#hint').hidden=true;S.phase='flying';hud();
 }
-function settle(d){
-  const side=S.sides[S.side],over=d.bodies[1].position.z<FENCE_Z-.2,c=over?null:canFor(d);let pts=c?c.pts:0,note=over?'Over the fence!':'',bust=false;
-  if(S.tb){S.tb.pts[S.side]=(S.tb.pts[S.side]||0)+pts}
-  else{
-    // Bust (SPEC §6): going over the target puts the score back to the start of this turn and ends the turn
-    if(pts&&side.score+pts>setup.target){bust=true;side.score=S.turnStart;S.left=0;note=`Back to ${S.turnStart}`}
-    else{side.score+=pts;if(pts&&side.score===setup.target){note=`Right on ${setup.target}!`;S.left=0}}
+/* Watching the yard until the turn ends (SPEC §6 Scoring). A baby's state: 'flying' (just tossed), 'in' (scored,
+   keeps its points), 'out' (stopped outside a can; can still be late in), 'gone' (over the fence or out of the
+   yard), 'pose' (the menu picture). */
+const STOPPED=.5; // seconds a baby must be still to count as stopped
+const SAME_MOMENT=.35; // babies that stop within this many seconds of each other score together (Claude's call)
+const SETTLE_MAX=6; // the last baby's turn waits at most this long for everything to stop (Claude's call)
+const inPlay=d=>d.state!=='pose'&&d.state!=='gone';
+function watchYard(dt){
+  for(const d of dolls){
+    if(!inPlay(d))continue;
+    d.still=coreSpeed(d)<.15?d.still+dt:0;
+    if(d.state==='flying'){
+      const b=d.bodies[1].position;
+      if(b.y<-2||Math.abs(b.x)>16||b.z<-25){d.state='gone';land(d,0)}
+      else if(d.still>STOPPED||d.age>10){const over=b.z<FENCE_Z-.2,c=over?null:canFor(d);d.state=over?'gone':c?'in':'out';land(d,c?c.pts:0,c,{over})}
+    }else if(d.state==='out'&&d.still>STOPPED){const c=canFor(d);if(c){d.state='in';land(d,c.pts,c,{late:true})}}
   }
-  const pop=$('#pop');pop.innerHTML=(bust?'BUST!':(pts===1?'1 PT':pts+' PTS'))+(note?`<small>${esc(note)}</small>`:'');pop.hidden=false;pop.classList.remove('show');void pop.offsetWidth;pop.classList.add('show');
-  sfx.score(bust?0:pts);if(c&&settings.alive)setTimeout(()=>cry(d,.6),500);
-  hud();S.cur=null;S.phase='between';S.wait=1.5;
 }
-function nextAfterThrow(){
-  if(S.left>0){readyThrow();return}
-  const ord=order();S.pos++;
-  if(S.pos<ord.length){S.side=ord[S.pos];startTurn();return}
-  // round over: everyone has had the same number of turns
-  let sub;
-  if(S.tb){const best=Math.max(...S.tb.sides.map(i=>S.tb.pts[i]||0)),lead=S.tb.sides.filter(i=>(S.tb.pts[i]||0)===best);if(lead.length===1)return declareWinner(lead[0]);S.tb={sides:lead,pts:{}};sub='Still tied! Most points this turn'}
-  else{const hit=S.sides.map((s,i)=>s.score===setup.target?i:-1).filter(i=>i>=0);if(hit.length===1)return declareWinner(hit[0]);if(hit.length>1){S.tb={sides:hit,pts:{}};sub='Tiebreak! Most points this turn'}}
-  S.round++;S.pos=0;S.side=order()[0];startTurn(sub);
+function land(d,pts,c,how={}){
+  const P=S.pending||(S.pending={pts:0,t:SAME_MOMENT,scored:[],late:false,over:false});
+  P.pts+=pts;if(c)P.scored.push(d);if(how.late)P.late=true;if(how.over)P.over=true;
+  if(d===S.flying){S.flying=null;S.phase='between';S.wait=1.5}
 }
-function declareWinner(i){S.side=i;S.phase='done';S.wait=.4}
+function resolvePending(){
+  const P=S.pending;S.pending=null;const r=addPoints(P.pts);
+  const note=r==='bust'?MSG.backTo(S.turnStart):r==='target'?MSG.rightOn(setup.target):P.pts&&P.late?MSG.lateIn:!P.pts&&P.over?MSG.over:'';
+  call(r==='bust'?MSG.bust:MSG.pts(P.pts),note);
+  sfx.score(r==='bust'?0:P.pts);if(settings.alive)P.scored.forEach(d=>setTimeout(()=>cry(d,.6),500));
+  if(r)endTurnEarly();
+  hud();
+}
+function call(text,note){const pop=$('#pop');pop.textContent=text;if(note){const s=document.createElement('small');s.textContent=note;pop.append(s)}pop.hidden=false;pop.classList.remove('show');void pop.offsetWidth;pop.classList.add('show')}
+// A bust or reaching the target ends the turn there, even with babies left (SPEC §6)
+function endTurnEarly(){S.left=0;S.flying=null;drag=null;aim.active=false;held.g.visible=false;showGuide(false);$('#grips').hidden=true;$('#hint').hidden=true;S.phase='ending';S.wait=1.6;hud()}
+function afterThrow(){if(S.left>0)readyThrow();else{S.phase='settling';S.wait=SETTLE_MAX}}
+function endTurn(){const r=nextTurn();if(r.winner!=null){S.turn=r.winner;S.phase='done';S.wait=.4}else{S.turn=r.next;startTurn(r.sub)}}
 function gameOver(){
-  S.phase='over';const w=S.sides[S.side];$('#overH').textContent=w.name+' wins!';
-  $('#final').innerHTML=[w,...S.sides.filter(s=>s!==w)].map(s=>`<li><span>${esc(s.name)}</span><span>${s.score}</span></li>`).join('');
+  S.phase='over';const w=current();$('#overH').textContent=MSG.wins(w.name);
+  $('#final').innerHTML=[w,...S.players.filter(s=>s!==w)].map(s=>`<li><span>${esc(s.name)}</span><span>${s.score}</span></li>`).join('');
   $('#over').hidden=false;$('#hud').hidden=true;$('#grips').hidden=true;$('#again').focus();
 }
 const babyIcon='<svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="7" fill="#eab08c"/><path d="M6 5c2-3 10-3 12 0-3-1-9-1-12 0z" fill="#6b4a2b"/><circle cx="9.5" cy="9" r="1.1" fill="#2a1d1a"/><circle cx="14.5" cy="9" r="1.1" fill="#2a1d1a"/><path d="M4 23c0-5 4-7 8-7s8 2 8 7z" fill="#b48cff"/></svg>';
 function hud(){
-  if(!S.player)return;const side=S.sides[S.side];
-  $('#who').innerHTML=esc(S.player.name)+(setup.teams?`<small>${esc(side.name)}</small>`:'');
+  if(!S.players.length)return;
+  $('#who').textContent=current().name;
   $('#babies').innerHTML=[0,1,2].map(i=>`<span class="${i<S.left?'':'used'}">${babyIcon}</span>`).join('');
-  $('#babies').setAttribute('aria-label',S.left+' babies left');
-  $('#board').innerHTML=S.sides.map((s,i)=>`<div class="row${i===S.side?' on':''}"><span>${esc(s.name)}</span><span>${s.score}${S.tb&&S.tb.sides.includes(i)?` <em>+${S.tb.pts[i]||0}</em>`:''}</span></div>`).join('')
-    +`<div class="to">${S.tb?'Tiebreak · most points':'Round '+(S.round+1)+' · exactly '+setup.target}</div><div class="to">Front 2 · Tall 1 · Bucket 5</div>`;
+  $('#babies').setAttribute('aria-label',MSG.babiesLeft(S.left));
+  $('#board').innerHTML=S.players.map((p,i)=>`<div class="row${i===S.turn?' on':''}"><span>${esc(p.name)}</span><span>${p.score}${S.tb&&S.tb.players.includes(i)?` <em>+${S.tb.pts[i]||0}</em>`:''}</span></div>`).join('')
+    +`<div class="to">${S.tb?MSG.tbBoard:MSG.round(S.round+1,setup.target)}</div><div class="to">${MSG.canValues}</div>`;
 }
 function renderGrips(){
   $('#gripRow').innerHTML=GRIPS.map((g,i)=>`<button type="button" role="radio" aria-checked="${g===grip}" data-grip="${g.id}" aria-keyshortcuts="${i+1}">${g.label}</button>`).join('');
   $('#gripNote').textContent=grip.note;
 }
-function pickGrip(id){grip=GRIPS.find(g=>g.id===id)||grip;if(S.player)S.player.grip=grip.id;renderGrips();if(aim.active)showGuide(true)}
+function pickGrip(id){grip=GRIPS.find(g=>g.id===id)||grip;if(S.phase==='aim')current().grip=grip.id;renderGrips();if(aim.active)showGuide(true)}
 $('#gripRow').addEventListener('click',e=>{const b=e.target.closest('[data-grip]');if(b)pickGrip(b.dataset.grip)});
 
 /* ---------- input ---------- */
@@ -504,7 +542,7 @@ function face(v,d,t){
 }
 function lifeTick(d,dt){
   d.cryCD-=dt;d.crying=Math.max(0,d.crying-dt);d.agit=Math.max(.12,d.agit-dt*.25);
-  if(settings.alive&&d!==S.cur&&d.agit<=.13&&d.age>2){d.nextWhimper-=dt;if(d.nextWhimper<=0){d.nextWhimper=rand(6,12);d.agit=.6;if(Math.random()<.5)cry(d,.35)}}
+  if(settings.alive&&d!==S.flying&&d.agit<=.13&&d.age>2){d.nextWhimper-=dt;if(d.nextWhimper<=0){d.nextWhimper=rand(6,12);d.agit=.6;if(Math.random()<.5)cry(d,.35)}}
 }
 function frame(){
   const dt=Math.min(clock.getDelta(),.05),t=clock.elapsedTime;
@@ -512,8 +550,12 @@ function frame(){
     world.step(1/240,dt,14);
     for(const d of dolls){d.age+=dt;lifeTick(d,dt);drawBodies(d);face(d.v,d,t)}
     if(held.g.visible){const pull=aim.active?aim.power:0,{P,Q}=heldPose(pull,t);if(settings.alive){const w=new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(t*5)*.05,0,Math.sin(t*3.3)*.06));Q.multiply(w)}drawPose(held,P,Q);face(held,held,t)}
-    if(S.phase==='flying'&&S.cur){const d=S.cur,b=d.bodies[1];d.still=coreSpeed(d)<.15?d.still+dt:0;if(d.still>.5||d.age>10||b.position.y<-2||Math.abs(b.position.x)>16||b.position.z<-25)settle(d)}
-    if(S.wait>0){S.wait-=dt;if(S.wait<=0){if(S.phase==='banner'){$('#banner').hidden=true;readyThrow()}else if(S.phase==='between')nextAfterThrow();else if(S.phase==='done')gameOver()}}
+    rockCans(dt);
+    if(['aim','flying','between','settling'].includes(S.phase))watchYard(dt);
+    if(S.pending){S.pending.t-=dt;if(S.pending.t<=0)resolvePending()}
+    // the turn's last baby: wait until it and everything it set moving stops (SPEC §6)
+    if(S.phase==='settling'){S.wait-=dt;if(!S.pending&&(S.wait<=0||dolls.every(d=>!inPlay(d)||d.still>STOPPED)))endTurn()}
+    else if(S.wait>0){S.wait-=dt;if(S.wait<=0){if(S.phase==='banner'){$('#banner').hidden=true;readyThrow()}else if(S.phase==='between')afterThrow();else if(S.phase==='ending')endTurn();else if(S.phase==='done')gameOver()}}
   }
   renderer.render(scene,camera);requestAnimationFrame(frame);
 }
@@ -522,12 +564,11 @@ addEventListener('resize',resize);resize();
 
 /* ---------- menu & settings UI ---------- */
 function renderPlayers(){
-  $('#players').innerHTML=setup.players.map((p,i)=>`<div class="prow"><input id="pname${i}" aria-label="Player ${i+1} name" maxlength="20" value="${esc(p.name)}">${setup.teams?`<button type="button" class="team t${p.team}" data-team="${i}" aria-label="${esc(p.name||'Player')} is on ${TEAM_NAMES[p.team]}. Tap to switch.">${TEAM_NAMES[p.team].replace('Team ','')}</button>`:''}<button type="button" class="x" data-del="${i}" aria-label="Remove ${esc(p.name||'player')}" ${setup.players.length<2?'disabled':''}>×</button></div>`).join('');
+  $('#players').innerHTML=setup.players.map((p,i)=>`<div class="prow"><input id="pname${i}" aria-label="${MSG.playerName(i+1)}" maxlength="20" value="${esc(p.name)}"><button type="button" class="x" data-del="${i}" aria-label="${esc(MSG.remove(p.name||'player'))}" ${setup.players.length<2?'disabled':''}>×</button></div>`).join('');
 }
 $('#players').addEventListener('input',e=>{const i=+e.target.id.replace('pname','');if(setup.players[i])setup.players[i].name=e.target.value});
-$('#players').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.del!=null){setup.players.splice(+b.dataset.del,1);renderPlayers()}else if(b.dataset.team!=null){const p=setup.players[+b.dataset.team];p.team=1-p.team;renderPlayers();$(`[data-team="${b.dataset.team}"]`).focus()}});
-$('#addP').addEventListener('click',()=>{if(setup.players.length>=12)return;const n=setup.players.length;setup.players.push({name:'Player '+(n+1),team:n%2});renderPlayers();$('#pname'+n).select()});
-$('#teams').addEventListener('change',e=>{setup.teams=e.target.checked;renderPlayers()});
+$('#players').addEventListener('click',e=>{const b=e.target.closest('button[data-del]');if(b){setup.players.splice(+b.dataset.del,1);renderPlayers()}});
+$('#addP').addEventListener('click',()=>{if(setup.players.length>=12)return;const n=setup.players.length;setup.players.push({name:'Player '+(n+1)});renderPlayers();$('#pname'+n).select()});
 const tgt=$('#target');const setT=v=>{tgt.value=Math.max(1,Math.min(500,Math.round(v)||20))};
 $('#tMinus').addEventListener('click',()=>setT(+tgt.value-5));$('#tPlus').addEventListener('click',()=>setT(+tgt.value+5));tgt.addEventListener('change',()=>setT(+tgt.value));
 function syncToggles(){['alive','alive2'].forEach(id=>$('#'+id).checked=settings.alive);['sound','sound2'].forEach(id=>$('#'+id).checked=settings.sound)}
@@ -536,13 +577,12 @@ function syncToggles(){['alive','alive2'].forEach(id=>$('#'+id).checked=settings
 $('#setup').addEventListener('submit',e=>{
   e.preventDefault();audio();setT(+tgt.value);setup.target=+tgt.value;
   const err=$('#setupErr');err.textContent='';
-  if(!setup.players.length){err.textContent='Add at least one player.';return}
-  if(setup.teams&&[0,1].some(t=>!setup.players.some(p=>p.team===t))){err.textContent='Each team needs at least one player.';return}
+  if(!setup.players.length){err.textContent=MSG.noPlayers;return}
   store.set('setup',setup);startGame();
 });
 $('#gear').addEventListener('click',()=>{S.paused=true;$('#settings').hidden=false;$('#resume').focus()});
 $('#resume').addEventListener('click',()=>{S.paused=false;$('#settings').hidden=true;clock.getDelta()});
-function toMenu(){S.paused=false;S.phase='menu';clearDolls();hush();held.g.visible=false;showGuide(false);['#settings','#over','#hud','#grips','#hint','#banner','#pop'].forEach(s=>$(s).hidden=true);$('#menu').hidden=false;renderPlayers();posed()}
+function toMenu(){S.paused=false;S.phase='menu';S.pending=null;S.flying=null;clearDolls();hush();held.g.visible=false;showGuide(false);['#settings','#over','#hud','#grips','#hint','#banner','#pop'].forEach(s=>$(s).hidden=true);$('#menu').hidden=false;renderPlayers();posed()}
 $('#quit').addEventListener('click',toMenu);$('#change').addEventListener('click',toMenu);
 $('#again').addEventListener('click',()=>{$('#over').hidden=true;startGame()});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#settings').hidden)$('#resume').click()});
@@ -555,7 +595,7 @@ function posed(){
   spawnDoll(new THREE.Vector3(.2,1.0,-6.4),E(.3,.4,.2));
   spawnDoll(new THREE.Vector3(-.2,1.9,-3.4),E(-.9,.3,.5),new THREE.Vector3(-.06,3.2,-3.6),new THREE.Vector3(-6,1,.5));
 }
-document.getElementById('teams').checked=setup.teams;tgt.value=setup.target;syncToggles();renderPlayers();posed();
+tgt.value=setup.target;syncToggles();renderPlayers();posed();
 window.claude?.hot?.snapshot?.(()=>({setup}));
 requestAnimationFrame(frame);
 }

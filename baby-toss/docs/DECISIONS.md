@@ -36,3 +36,9 @@ the end.
   the fence is just 0. Babies stay where they land until the turn ends. Cans wobble but never tip (may revisit).
   1–12 players; target 1–500 in steps of 5. Replaces Claude's first version, where each baby was scored only once,
   when it stopped.
+- 2026-11-27: Built the rule clarifications. Teams are gone from the page. Each baby has a state (flying, in, out,
+  gone) and the yard is watched until the turn ends, so late ins score whenever they happen, even while the player
+  aims. Fully in now uses each part's whole size (before, half of it could poke over the rim). Cans wobble in the
+  picture only. Claude's calls: "same moment" is 0.35 s (open question in SPEC §13), stopped is 0.5 s still, the
+  wait for the last baby is capped at 6 s, and a late in's call says "Late in!". Also moved the script's messages
+  into one `MSG` table and the scoring and turn order into plain functions (CODING_STANDARDS §2, §4).

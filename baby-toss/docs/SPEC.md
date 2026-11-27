@@ -58,7 +58,8 @@ is the written version.
 
 - The fence is about 9 m away and 1.9 m tall. A baby that goes over it scores 0 ("Over the fence!"). (Claude's call)
 - The back bucket is meant to be partly hidden: about a third of it is behind the tall can from the throwing spot.
-- The cans wobble a little when hit but never tip over. (user, 2026-11-27; may be revisited)
+- The cans wobble a little when hit but never tip over. (user, 2026-11-27; may be revisited) In the game only the
+  can's picture rocks; the can itself stays put, so a wobble never changes whether a baby is fully in. (Claude's call)
 
 ## 5. The babies
 - **Doll physics.** The babies are dolls about 39 cm long: a **stuffed, flexible body** with a **hard vinyl head,
@@ -97,7 +98,7 @@ is the written version.
 - A baby resting on another baby inside a can counts if it is fully in. A pile sticking out never takes back a
   baby's points. (user, 2026-11-27)
 - If several babies score at the same moment, their points are added together before checking for a bust.
-  (user, 2026-11-27)
+  (user, 2026-11-27) "The same moment" means babies that stop within 0.35 s of each other. (Claude's call)
 - A baby that goes over the fence scores 0 ("Over the fence!"), with no other penalty. (user, 2026-11-27)
 - Each score shows a big call like the video: "2 PTS", "1 PT", "5 PTS", "0 PTS". (user)
 
@@ -109,7 +110,8 @@ is the written version.
 - Reaching the target exactly ends that player's turn ("Right on 20!"). (user, 2026-11-27)
 - A late in counts the same way: it can bust or reach the target, and either ends the turn. (user, 2026-11-27)
 - The turn ends when its last baby (and everything it set moving) stops, or earlier on a bust or reaching the target.
-  (user, 2026-11-27)
+  (user, 2026-11-27) A baby counts as stopped after half a second still; the wait after the last baby is at most 6 s,
+  so wriggling Living babies can't hold up the game. A late in shows "Late in!" under its call. (Claude's call)
 
 ### Rounds and winning
 - **Everyone gets the same number of turns:** a round always finishes, even after someone reaches the target. (user)
@@ -174,4 +176,6 @@ is the written version.
 ## 13. Open questions
 1. **Grip feel** (§7): the arc, power, spin and accuracy of each grip need the user to play and tune them.
 2. **Can sizes and distances** (§4): these are guesses from the video. Does the user have real measurements?
-3. **Credit:** should the game show a credit for the user as its inventor (as My Brain does in its footer)?
+3. **Same moment** (§6): babies that stop within 0.35 s of each other score together. Should it be longer, for
+   example everything one toss knocks in?
+4. **Credit:** should the game show a credit for the user as its inventor (as My Brain does in its footer)?
