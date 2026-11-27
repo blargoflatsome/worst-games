@@ -143,7 +143,7 @@ h1{font-size:40px}
       <h1>Baby Toss</h1>
     </div>
     <p class="tag">Kid Tested, Mother Approved!</p>
-    <p class="rules">Everyone gets <b>3 babies</b> a turn. A baby only counts if it's <b>fully in</b> the can. Front can <b>2</b>, tall can <b>1</b>, the little bucket hiding at the back <b>5</b>. A baby knocked in later in the turn counts then. Hit the target <b>exactly</b>: go over and you bust, back to your score from the start of that turn. The round always finishes, so everyone gets the same number of turns. Hold each baby by the head, a hand, a foot, both feet, or overhand by the body. Each throws differently.</p>
+    <p class="rules">Everyone gets <b>3 babies</b> a turn. A baby counts if its <b>body is in</b> the can (head, arms and legs can stick out). Front can <b>2</b>, tall can <b>1</b>, the little bucket hiding at the back <b>5</b>. A baby knocked in later in the turn counts then. Hit the target <b>exactly</b>: go over and you bust, back to your score from the start of that turn. The round always finishes, so everyone gets the same number of turns. Hold each baby by the head, a hand, a foot, both feet, or overhand by the body. Each throws differently.</p>
     <div class="sec">Players</div>
     <div id="players"></div>
     <button type="button" class="ghost" id="addP">+ Add player</button>
@@ -401,7 +401,7 @@ function buildCan(c){
   b.position.set(c.x,0,c.z);b.can=c;world.addBody(b);Object.assign(c,{inner:rt+.005,g,w:[0,0],wv:[0,0]});
 }
 // Cans wobble a little when hit but never tip (SPEC §4): only the drawing rocks; the physics can stays put,
-// so the fully-in check is unchanged by a wobble.
+// so the body-in check is unchanged by a wobble.
 function wobble(c,v,iv){const h=Math.hypot(v.x,v.z)||1,k=Math.min(.6,iv*.11);c.wv[0]+=v.z/h*k;c.wv[1]-=v.x/h*k}
 function rockCans(dt){for(const c of CANS){for(const i of [0,1]){c.wv[i]+=(-196*c.w[i]-7*c.wv[i])*dt;c.w[i]=Math.max(-.05,Math.min(.05,c.w[i]+c.wv[i]*dt))}c.g.rotation.set(c.w[0],0,c.w[1])}}
 CANS.forEach(buildCan);
@@ -572,10 +572,13 @@ world.addEventListener('preStep',()=>{
     if(d===S.flying&&!d.landed&&d.grip&&d.grip.curve){const tot=.47*9.82*d.grip.curve;_f.set(Math.cos(d.yaw)*tot,0,Math.sin(d.yaw)*tot);d.bodies[1].applyForce(_f,d.bodies[1].position)}
   }
 });
-// Fully in (SPEC §6): every part of the baby, its whole size included, is inside the can and below the rim.
+// Body in (SPEC §6): the baby's body (chest and belly), its whole size included, is inside the can and below the
+// rim; the head, arms and legs may stick out. A baby counts as stopped when its head and body are still (coreSpeed),
+// so the parts that decide the score are the parts that have stopped.
+const BODY=[1,2];
 function canFor(d){
   const inside=(c,b,k)=>{b.pointToWorldFrame(b.shapeOffsets[k],_cv);const r=b.shapes[k].radius,dx=_cv.x-c.x,dz=_cv.z-c.z,rr=c.inner-r;return dx*dx+dz*dz<=rr*rr&&_cv.y+r<=c.h+.01};
-  return CANS.find(c=>d.bodies.every(b=>b.shapes.every((_,k)=>inside(c,b,k))))||null;
+  return CANS.find(c=>BODY.every(i=>d.bodies[i].shapes.every((_,k)=>inside(c,d.bodies[i],k))))||null;
 }
 const coreSpeed=d=>Math.max(...CORE.map(i=>d.bodies[i].velocity.length()));
 

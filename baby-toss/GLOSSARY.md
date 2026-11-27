@@ -41,12 +41,13 @@ How the baby is held for a toss: head, left hand, right hand, left foot, right f
 body.
 _Avoid_: Hold, throw type
 
-**Fully in**:
-A baby whose every part is inside a can and below its rim. The only way a baby scores.
-_Avoid_: In, made it
+**Body in**:
+A baby whose body (chest and belly) is inside a can and below its rim; its head, arms and legs may stick out. The
+only way a baby scores. Replaced "fully in" (every part in) on 2026-11-27.
+_Avoid_: Fully in, made it
 
 **Late in**:
-An earlier baby from the same turn that ends up fully in after it stopped, knocked in by a later toss or wriggling
+An earlier baby from the same turn whose body ends up in a can after it stopped, knocked in by a later toss or wriggling
 in by itself. It scores then, once.
 _Avoid_: Knock-in, wriggle-in
 

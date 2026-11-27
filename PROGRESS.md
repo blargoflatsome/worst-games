@@ -17,6 +17,8 @@ Current state only. Update at the end of every session.
 - Fireworks over the fence, blinking held baby, scoreboard fixed at 320 px, merged 2026-11-27.
 - Tall can lettered like the user's real can; logo and can font on the home screen, merged 2026-11-27.
 - Worst Human medal on the winner screen, merged 2026-11-27. (The throne was tried and removed.)
+- **Body in** replaces fully in: a baby counts if its body is in the can, head, arms and legs may stick out
+  (SPEC §6). Fixes a foot that slid in late costing a baby its points. On `ccr-2b3b8f7f-hy09hk`, not merged.
 - **Phase 2 (later):** multiple and unlockable baby skins (SPEC §12).
 - **Next:** the user plays it and tunes the grips; the open questions (SPEC §13), including how long "the same
   moment" is.
