@@ -97,3 +97,4 @@ the end.
 - 2026-11-27: Fixed the throne seat floating off the skull and 34 cm in front of the board (missed because only a
   front view was checked). The skull is now squared off into a solid block base, wider than the seat. Throne
   changes are now checked from the side as well as the front.
+- 2026-11-27: The throne is removed from the yard (user), after several tries that didn't look right.

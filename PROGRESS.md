@@ -11,7 +11,7 @@ Current state only. Update at the end of every session.
 - More realistic yard, light, babies and cans, with automatic quality drop (SPEC §3–5), merged 2026-11-27.
 - Fireworks over the fence, blinking held baby, scoreboard fixed at 320 px, merged 2026-11-27.
 - Tall can lettered like the user's real can; logo and can font on the home screen, merged 2026-11-27.
-- Worst Human medal on the winner screen and the empty throne in the yard, merged 2026-11-27.
+- Worst Human medal on the winner screen, merged 2026-11-27. (The throne was tried and removed.)
 - **Phase 2 (later):** multiple and unlockable baby skins (SPEC §12).
 - **Next:** the user plays it and tunes the grips; the open questions (SPEC §13), including how long "the same
   moment" is.
