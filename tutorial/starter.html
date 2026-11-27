@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ball Toss</title>
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;font:16px system-ui,sans-serif}
+  #scene{position:fixed;inset:0;width:100%;height:100%;touch-action:none}
+  #score{position:fixed;top:12px;left:12px;background:#fffd;padding:8px 12px;border-radius:12px}
+</style>
+</head>
+<body>
+<canvas id="scene"></canvas>
+<div id="score" aria-live="polite">Tap to throw. Score: 0</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cannon.js/0.6.2/cannon.min.js"></script>
+<script>
+{
+  /* ---------- drawing: renderer, scene, camera, light ---------- */
+  const canvas = document.getElementById('scene');
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x9cc7ea);
+  const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+  camera.position.set(0, 1.6, 2);          // metres: 1.6 m up, 2 m back
+  camera.lookAt(0, 0.3, -6.4);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x557744, 1));
+
+  /* ---------- physics: a world with gravity ---------- */
+  const world = new CANNON.World();
+  world.gravity.set(0, -9.82, 0);
+
+  // the ground: drawn as a big green plane, simulated as an infinite plane
+  const groundMesh = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshLambertMaterial({ color: 0x5f9e3f }));
+  groundMesh.rotation.x = -Math.PI / 2;
+  scene.add(groundMesh);
+  const groundBody = new CANNON.Body({ mass: 0 });   // mass 0 = never moves
+  groundBody.addShape(new CANNON.Plane());
+  groundBody.quaternion.setFromAxisAngle(new CANNON.Vec3(1, 0, 0), -Math.PI / 2);
+  world.addBody(groundBody);
+
+  // the target: a ring on the grass 5 m away
+  const TARGET = { x: 0, z: -5, r: 0.6, pts: 1 };
+  const ring = new THREE.Mesh(new THREE.RingGeometry(TARGET.r - 0.05, TARGET.r, 48), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+  ring.rotation.x = -Math.PI / 2;
+  ring.position.set(TARGET.x, 0.01, TARGET.z);
+  scene.add(ring);
+
+  /* ---------- balls: every ball is a mesh (what you see) and a body (what moves) ---------- */
+  const balls = [];
+  function throwBall() {
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(0.1, 24, 16), new THREE.MeshLambertMaterial({ color: 0xff3d7f }));
+    scene.add(mesh);
+    // damping slows it down over time, like air and grass
+    const body = new CANNON.Body({ mass: 0.2, shape: new CANNON.Sphere(0.1), linearDamping: 0.5, angularDamping: 0.9 });
+    body.position.set(0, 1.2, 0.5);
+    // metres per second: sideways, up, away (-z is away from the camera), with some random aim and power
+    body.velocity.set((Math.random() - 0.5) * 1.5, 3, -6.4 + (Math.random() - 0.5) * 2);
+    world.addBody(body);
+    balls.push({ mesh, body, scored: false, still: 0 });
+  }
+
+  /* ---------- rules: plain functions, no drawing ---------- */
+  let score = 0;
+  const inTarget = b => Math.hypot(b.position.x - TARGET.x, b.position.z - TARGET.z) < TARGET.r;
+  function checkBall(ball, dt) {
+    ball.still = ball.body.velocity.length() < 0.15 ? ball.still + dt : 0;
+    if (!ball.scored && ball.still > 0.5) {       // stopped for half a second
+      ball.scored = true;
+      if (inTarget(ball.body)) score += TARGET.pts;
+      document.getElementById('score').textContent = `Tap to throw. Score: ${score}`;
+    }
+  }
+
+  /* ---------- input: pointer events work for mouse, touch and pen ---------- */
+  canvas.addEventListener('pointerdown', throwBall);
+
+  /* ---------- loop: step the physics, copy bodies to meshes, draw, repeat ---------- */
+  const clock = new THREE.Clock();
+  function frame() {
+    const dt = Math.min(clock.getDelta(), 0.05);   // a slow frame never makes a huge jump
+    world.step(1 / 120, dt, 10);                    // fixed physics steps, catching up to real time
+    for (const ball of balls) {
+      ball.mesh.position.copy(ball.body.position);
+      ball.mesh.quaternion.copy(ball.body.quaternion);
+      checkBall(ball, dt);
+    }
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+  function resize() {
+    renderer.setSize(innerWidth, innerHeight, false);
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+  }
+  addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(frame);
+}
+</script>
+</body>
+</html>
