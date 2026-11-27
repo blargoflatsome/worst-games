@@ -8,7 +8,7 @@ A backyard game made into a browser game. Toss baby dolls into three trash cans 
 
 Open `index.html` in a browser (phone or computer). It loads three.js and cannon.js from cdnjs, so it needs an internet connection.
 
-- Pick a grip, then swipe up from anywhere, even from the grip buttons. A longer swipe throws farther; slide sideways to aim.
+- Pick a grip, then press on the yard, pull down and let go, like a slingshot. Pull farther to throw farther; pull left to aim right.
 - Keyboard: `1`–`7` pick a grip, arrow keys aim and set power, `Space` or `Enter` throws.
 
 ## Rules

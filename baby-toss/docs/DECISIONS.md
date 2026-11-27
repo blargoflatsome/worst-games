@@ -48,3 +48,8 @@ the end.
   the cans (front to tall can went from about 40 px to about 90 px of finger travel), aim follows sideways
   movement instead of the swipe's angle, and the last 0.08 s before the finger lifts is ignored. (user agreed to
   Claude's proposal)
+- 2026-11-27: Throwing changed from swiping up to pulling back like a slingshot. (user) Full power had needed a
+  swipe of 70% of the screen. Claude looked at similar games (slingshot, darts, golf, cornhole): pull-back is the
+  common one-gesture design, needs only a short pull and keeps the finger off the target; timed power meters are
+  hard to hit on touch. Full power is now a third of the screen. If it doesn't feel good, a backswing and toss
+  (slide down for power, flick up to throw) is next (SPEC §13).

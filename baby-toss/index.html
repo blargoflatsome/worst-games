@@ -76,6 +76,7 @@ h1{margin:0;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em;c
 #board em{font-style:normal;color:var(--pink)}
 #hint{position:fixed;left:50%;transform:translateX(-50%);bottom:max(112px,calc(env(safe-area-inset-bottom,0px) + 112px));background:#241a33d9;color:#fff;font-weight:800;padding:10px 16px;border-radius:14px;font-size:15px;text-align:center;width:max-content;max-width:calc(100% - 32px);pointer-events:none}
 #meter{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:max(120px,calc(env(safe-area-inset-bottom,0px) + 120px));width:16px;height:34vh;max-height:240px;border-radius:10px;background:#ffffffb0;overflow:hidden;box-shadow:0 2px 8px #0002;pointer-events:none}
+#pull{position:fixed;width:44px;height:44px;margin:-22px 0 0 -22px;border:3px solid #fff;border-radius:50%;box-shadow:0 0 0 2px #241a3399;pointer-events:none}
 #meter i{position:absolute;left:0;right:0;bottom:0;height:0;background:linear-gradient(#ff3d7f,#ffb13d 60%,#3ddc84)}
 #pop{position:fixed;left:50%;top:34%;transform:translate(-50%,-50%);font-size:clamp(48px,13vw,96px);color:#fff;text-shadow:0 4px 0 #241a33,0 0 24px #0006;-webkit-text-stroke:2px #241a33;pointer-events:none;white-space:nowrap;text-align:center;line-height:1}
 #pop small{display:block;font-size:.3em;-webkit-text-stroke:1px #241a33;margin-top:6px}
@@ -102,7 +103,7 @@ h1{font-size:40px}
 @media (prefers-reduced-motion:reduce){#pop.show{animation:none;opacity:1}}
 </style>
 
-<canvas id="scene" aria-label="Backyard with three trash cans. Swipe up to toss a baby doll." role="img"></canvas>
+<canvas id="scene" aria-label="Backyard with three trash cans. Pull down and let go to toss a baby doll." role="img"></canvas>
 
 <div id="hud" hidden>
   <div class="pill"><div id="who" aria-live="polite"></div><div id="babies" aria-label="Babies left"></div></div>
@@ -112,8 +113,9 @@ h1{font-size:40px}
   </div>
 </div>
 <div id="grips" hidden><div id="gripRow" role="radiogroup" aria-label="How to hold the baby"></div><div id="gripNote" aria-live="polite"></div></div>
-<div id="hint" hidden>Pick a grip, then swipe up anywhere to toss. A longer swipe throws farther; slide sideways to aim.</div>
+<div id="hint" hidden>Pick a grip, then press on the yard, pull down and let go. Pull farther to throw farther; pull left to aim right.</div>
 <div id="meter" hidden><i></i></div>
+<div id="pull" hidden></div>
 <div id="pop" class="slab" hidden></div>
 <div id="banner" hidden><div class="slab" id="bannerName"></div><div id="bannerSub"></div></div>
 
@@ -497,7 +499,7 @@ function resolvePending(){
 }
 function call(text,note){const pop=$('#pop');pop.textContent=text;if(note){const s=document.createElement('small');s.textContent=note;pop.append(s)}pop.hidden=false;pop.classList.remove('show');void pop.offsetWidth;pop.classList.add('show')}
 // A bust or reaching the target ends the turn there, even with babies left (SPEC §6)
-function endTurnEarly(){S.left=0;S.flying=null;drag=null;aim.active=false;held.g.visible=false;showGuide(false);$('#grips').hidden=true;$('#hint').hidden=true;S.phase='ending';S.wait=1.6;hud()}
+function endTurnEarly(){S.left=0;S.flying=null;endPull();aim.active=false;held.g.visible=false;showGuide(false);$('#grips').hidden=true;$('#hint').hidden=true;S.phase='ending';S.wait=1.6;hud()}
 function afterThrow(){if(S.left>0)readyThrow();else{S.phase='settling';S.wait=SETTLE_MAX}}
 function endTurn(){const r=nextTurn();if(r.winner!=null){S.turn=r.winner;S.phase='done';S.wait=.4}else{S.turn=r.next;startTurn(r.sub)}}
 function gameOver(){
@@ -522,39 +524,34 @@ function pickGrip(id){grip=GRIPS.find(g=>g.id===id)||grip;if(S.phase==='aim')cur
 $('#gripRow').addEventListener('click',e=>{const b=e.target.closest('[data-grip]');if(b)pickGrip(b.dataset.grip)});
 
 /* ---------- input ---------- */
-/* Swipe to throw (SPEC §8). A swipe can start anywhere, the grip buttons included: there a tap picks the grip
-   and only an upward move turns into a throw. Power comes from how far up the finger goes, aim from how far
-   sideways. The throw uses where the finger was a moment before it lifted, so the lift-off flick doesn't count. */
-const SWIPE={full:.7,fullMax:560,start:10,aimWidth:500,aimMax:.4,aimGain:.6,lookback:80};
-let drag=null,swallowClick=false;
-function dragStart(e,started){
+/* Pull back to throw (SPEC §8), like a slingshot: press anywhere on the yard, pull down and let go. How far down
+   sets the power, how far sideways aims the other way, so the finger never covers the cans. The throw uses where
+   the finger was a moment before it lifted, so the lift-off doesn't count. Pulling back to the start cancels. */
+const PULL={full:.33,fullMin:160,fullMax:320,aimWidth:500,aimMax:.4,aimGain:.6,lookback:80};
+let drag=null;
+canvas.addEventListener('pointerdown',e=>{
   if(S.phase!=='aim'||S.paused||e.button!==0||drag)return;
-  audio();swallowClick=false;drag={id:e.pointerId,x:e.clientX,y:e.clientY,started,hist:[]};
-  if(started){aim.active=true;aim.power=0;aim.yaw=0}
-}
-canvas.addEventListener('pointerdown',e=>dragStart(e,true));
-$('#gripRow').addEventListener('pointerdown',e=>dragStart(e,false));
+  audio();drag={id:e.pointerId,x:e.clientX,y:e.clientY,hist:[]};aim.active=true;aim.power=0;aim.yaw=0;
+  const r=$('#pull');r.style.left=e.clientX+'px';r.style.top=e.clientY+'px';r.hidden=false;
+});
 addEventListener('pointermove',e=>{
   if(!drag||e.pointerId!==drag.id)return;
-  const dx=e.clientX-drag.x,dy=drag.y-e.clientY;
-  if(!drag.started){if(dy<SWIPE.start||dy<Math.abs(dx))return;drag.started=true;swallowClick=true;aim.active=true}
-  const full=Math.min(innerHeight*SWIPE.full,SWIPE.fullMax);
+  const dx=e.clientX-drag.x,dy=e.clientY-drag.y,full=Math.max(PULL.fullMin,Math.min(innerHeight*PULL.full,PULL.fullMax));
   aim.power=Math.max(0,Math.min(1,dy/full));
-  aim.yaw=Math.max(-SWIPE.aimMax,Math.min(SWIPE.aimMax,dx/Math.min(innerWidth,SWIPE.aimWidth)*SWIPE.aimGain));
+  aim.yaw=Math.max(-PULL.aimMax,Math.min(PULL.aimMax,-dx/Math.min(innerWidth,PULL.aimWidth)*PULL.aimGain));
   drag.hist.push({t:e.timeStamp,power:aim.power,yaw:aim.yaw});
   while(drag.hist.length>2&&drag.hist[1].t<e.timeStamp-300)drag.hist.shift();
   showGuide(aim.power>.02);
 });
+function endPull(){drag=null;$('#pull').hidden=true}
 addEventListener('pointerup',e=>{
   if(!drag||e.pointerId!==drag.id)return;
-  const d=drag;drag=null;if(!d.started)return;
-  const before=d.hist.filter(h=>h.t<=e.timeStamp-SWIPE.lookback).pop()||d.hist[0];
+  const d=drag;endPull();
+  const before=d.hist.filter(h=>h.t<=e.timeStamp-PULL.lookback).pop()||d.hist[0];
   if(before){aim.power=before.power;aim.yaw=before.yaw}
   doThrow();
 });
-addEventListener('pointercancel',e=>{if(!drag||e.pointerId!==drag.id)return;drag=null;aim.active=false;showGuide(false)});
-// a swipe that started on a grip button must not also pick that grip
-$('#gripRow').addEventListener('click',e=>{if(swallowClick){swallowClick=false;e.stopPropagation();e.preventDefault()}},true);
+addEventListener('pointercancel',e=>{if(!drag||e.pointerId!==drag.id)return;endPull();aim.active=false;showGuide(false)});
 addEventListener('keydown',e=>{
   if(S.phase!=='aim'||S.paused||e.target.tagName==='INPUT')return;
   const k=e.key;
@@ -614,7 +611,7 @@ $('#setup').addEventListener('submit',e=>{
 });
 $('#gear').addEventListener('click',()=>{S.paused=true;$('#settings').hidden=false;$('#resume').focus()});
 $('#resume').addEventListener('click',()=>{S.paused=false;$('#settings').hidden=true;clock.getDelta()});
-function toMenu(){S.paused=false;S.phase='menu';S.pending=null;S.flying=null;clearDolls();hush();held.g.visible=false;showGuide(false);['#settings','#over','#hud','#grips','#hint','#banner','#pop'].forEach(s=>$(s).hidden=true);$('#menu').hidden=false;renderPlayers();posed()}
+function toMenu(){S.paused=false;S.phase='menu';S.pending=null;S.flying=null;clearDolls();hush();held.g.visible=false;showGuide(false);['#settings','#over','#hud','#grips','#hint','#banner','#pop','#pull'].forEach(s=>$(s).hidden=true);$('#menu').hidden=false;renderPlayers();posed()}
 $('#quit').addEventListener('click',toMenu);$('#change').addEventListener('click',toMenu);
 $('#again').addEventListener('click',()=>{$('#over').hidden=true;startGame()});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#settings').hidden)$('#resume').click()});

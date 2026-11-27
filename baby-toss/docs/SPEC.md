@@ -145,14 +145,13 @@ is the written version.
 - Each player's last grip is remembered for their next turn. (Claude's call)
 
 ## 8. Controls (Claude's call)
-- **Touch or mouse:** pick a grip from the row of buttons along the bottom, then swipe up. A swipe can start
-  anywhere, the grip buttons included: a tap on a grip picks it, and moving the finger up turns it into a throw.
-  How far up the finger goes sets the power (full power at 70% of the screen height, at most 560 px); how far it
-  moves sideways aims left or right, gently. Power sets the square of the speed, so each can gets about the same
-  stretch of the swipe. The throw uses where the finger was 0.08 s before it lifted, so the flick of letting go
-  doesn't change it. While swiping, a short dotted arc and a power bar show the start of the throw (not where it
-  lands). A very short swipe doesn't throw. (2026-11-27: the user found the old swipe area too small and the
-  power too touchy on a Samsung phone; this is Claude's fix, agreed by the user)
+- **Touch or mouse: pull back to throw**, like a slingshot. (user, 2026-11-27) Pick a grip from the row of buttons
+  along the bottom, then press anywhere on the yard, pull down and let go. How far down sets the power: full power
+  at a third of the screen height (160 to 320 px). Pulling sideways aims the other way, gently (pull left to aim
+  right), so the finger never covers the cans. Power sets the square of the speed, so each can gets about the same
+  stretch of the pull. The throw uses where the finger was 0.08 s before it lifted, so letting go doesn't change
+  it. A ring marks where the pull started; pulling back to it cancels. While pulling, a short dotted arc and a power
+  bar show the start of the throw (not where it lands). (Claude's call: the numbers)
 - **Keyboard:** 1 to 7 pick a grip, Left and Right aim, Up and Down set power, Space or Enter throws.
 - A hint explains swiping before the first throw of a game.
 
@@ -183,4 +182,6 @@ is the written version.
 2. **Can sizes and distances** (§4): these are guesses from the video. Does the user have real measurements?
 3. **Same moment** (§6): babies that stop within 0.35 s of each other score together. Should it be longer, for
    example everything one toss knocks in?
-4. **Credit:** should the game show a credit for the user as its inventor (as My Brain does in its footer)?
+4. **Throw gesture** (§8): if pulling back doesn't feel good, the next thing to try is a backswing and toss:
+   slide down to set the power, then flick up to throw, the flick's direction aiming. (user, 2026-11-27)
+5. **Credit:** should the game show a credit for the user as its inventor (as My Brain does in its footer)?
