@@ -98,3 +98,7 @@ the end.
   front view was checked). The skull is now squared off into a solid block base, wider than the seat. Throne
   changes are now checked from the side as well as the front.
 - 2026-11-27: The throne is removed from the yard (user), after several tries that didn't look right.
+- 2026-11-27: More realistic babies and varied cries (user). The head is one sculpted surface with colour in the
+  skin, like the throne's skull; glassy textured doll eyes with real eyelids replace painted eyes (blinks now move the
+  lids). The skin glows slightly warm and takes less of the lawn's reflected light, which had turned shadows olive.
+  Cries are built from a per-baby voice and six patterns (Claude's call).

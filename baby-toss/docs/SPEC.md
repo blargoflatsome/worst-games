@@ -89,8 +89,10 @@ is the written version.
   With it off they are only dolls: no movement of their own, no crying. (user; the details are
   Claude's call)
 - **Looks** (Claude's call, made more realistic at the user's request 2026-11-27): glossy vinyl skin; knit onesies
-  in a few pastel colours, plain, dotted or striped; painted eyes with a highlight, brows, a button nose, ears, rosy
-  cheeks and painted hair with a curl; chubby arms with mitten hands; a neck and waist that follow the ragdoll's
+  in a few pastel colours, plain, dotted or striped, with a collar and snaps; a sculpted head (chubby cheeks, button
+  nose with nostrils, lips, chin) with rosy cheeks and lips; glassy doll eyes (blue, brown, green or dark) with eyelids
+  that close for blinks and crying; an open mouth while crying; painted hair with a curl; chubby arms with fingers and a
+  thumb; toes on the feet (realism raised again at the user's request, 2026-11-27); a neck and waist that follow the ragdoll's
   bends. Looks only: the physics shapes and sizes are unchanged.
 - Babies stay where they land for the rest of the turn, so later babies can hit them. The yard is cleared between
   turns. (user, 2026-11-27)
@@ -192,7 +194,10 @@ is the written version.
 
 ## 10. Sound (Claude's call)
 - Thuds on grass, clangs on the metal can, softer thumps for the stuffed body, a short tune for points, fireworks
-  whistles and bangs, and the babies' cries (Living babies only). All made by the page; no sound files.
+  whistles and bangs, and the babies' cries (Living babies only).
+- **Cries vary** (user, 2026-11-27): each baby has its own voice (pitch, rasp, wobble), and each cry is one of six
+  kinds picked by how hard it was hit: a scream, wail or gasping sobs for a hard hit; a wail, "wah-wah" bursts, sobs
+  or fussing on landing in a can; whimpers or fussing while lying in the yard. (Claude's call: the kinds and voices) All made by the page; no sound files.
 - Sound has its own on/off setting, on by default.
 
 ## 11. Settings

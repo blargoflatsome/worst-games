@@ -426,10 +426,9 @@ const CORE=[0,1,2];
 
 const ONESIES=[0xb48cff,0xff9ec7,0x8fd3ff,0xfff07a,0x9be3b0,0x6cc7bd];
 // Looks (SPEC §5): glossy vinyl skin, a soft knit onesie (plain, dotted or striped), painted face and hair.
-const skin=new THREE.MeshPhysicalMaterial({color:lin(0xefb895),roughness:.42,clearcoat:.35,clearcoatRoughness:.3});
+const skin=new THREE.MeshPhysicalMaterial({emissive:lin(0x3a160c),envMapIntensity:.55,color:lin(0xefb895),roughness:.42,clearcoat:.35,clearcoatRoughness:.3});
 const paint=c=>new THREE.MeshStandardMaterial({color:lin(c),roughness:.3});
-const dark=paint(0x2a1d1a),white=paint(0xffffff),lip=paint(0xd9827a),brow=paint(0x7a5640);
-const blush=new THREE.MeshStandardMaterial({color:lin(0xf29a9a),roughness:.6,transparent:true,opacity:.55});
+const white=paint(0xffffff),mouthMat=new THREE.MeshBasicMaterial({color:lin(0x3a0d12)}); // unlit: an open mouth reads as a dark opening
 const hairTex=tex(128,128,(g,w,h)=>{g.fillStyle='#fff';g.fillRect(0,0,w,h);for(let i=0;i<260;i++){g.strokeStyle=`rgba(0,0,0,${rand(.05,.2)})`;g.lineWidth=rand(.5,1.5);const x=Math.random()*w;g.beginPath();g.moveTo(x,0);g.quadraticCurveTo(x+rand(-8,8),h/2,x+rand(-12,12),h);g.stroke()}});
 const hairMats=[0x6b4a2b,0xe8c46a,0x2b1d14,0xa0522d].map(c=>new THREE.MeshStandardMaterial({color:lin(c),roughness:.6,map:hairTex}));
 const knit=kind=>tex(128,128,(g,w,h)=>{g.fillStyle='#f4f4f4';g.fillRect(0,0,w,h);
@@ -442,33 +441,72 @@ const sph=new THREE.SphereGeometry(1,32,22),cylU=new THREE.CylinderGeometry(1,1,
 const UP=new THREE.Vector3(0,1,0);
 function mk(geo,mat,sx,sy,sz){const m=new THREE.Mesh(geo,mat);m.scale.set(sx,sy??sx,sz??sx);m.castShadow=true;return m}
 function at(m,x,y,z){m.position.set(x,y,z);return m}
+/* The head is one sculpted surface (chubby cheeks, button nose and nostrils, philtrum, lips, chin, the back of the
+   head), with rosy cheeks, nose and lips coloured into the skin. Built once and shared by every baby. */
+const sm=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)};
+const blob=(x,y,cx,cy,rx,ry)=>{const u=(x-cx)/rx,v=(y-cy)/ry;return 1-sm(.4,1,Math.sqrt(u*u+v*v))};
+const HEAD_SCALE=[.071,.073,.069];
+const headGeo=(()=>{const geo=new THREE.SphereGeometry(1,72,54),p=geo.attributes.position,col=[],n=new THREE.Vector3();
+  for(let i=0;i<p.count;i++){n.fromBufferAttribute(p,i).normalize();const x=n.x,y=n.y,front=sm(0,.35,n.z);let d=0,pink=0,dark=0;
+    for(const e of [-1,1]){
+      d+=.055*blob(x,y,e*.5,-.3,.32,.28);pink+=.45*blob(x,y,e*.5,-.26,.24,.18); // cheeks
+      d-=.05*blob(x,y,e*.36,.1,.17,.11);dark+=.04*blob(x,y,e*.36,.1,.2,.13); // eye sockets
+      d+=.02*blob(x,y,e*.36,.27,.2,.06); // brow
+      d-=.02*blob(x,y,e*.045,-.19,.018,.014);dark+=.25*blob(x,y,e*.045,-.19,.018,.014); // nostrils
+    }
+    d+=.12*blob(x,y,0,-.12,.09,.1)+.02*blob(x,y,0,0,.06,.12);pink+=.25*blob(x,y,0,-.12,.09,.1); // button nose and bridge
+    d-=.015*blob(x,y,0,-.31,.03,.06); // philtrum
+    d+=.035*blob(x,y,0,-.41,.14,.035)+.04*blob(x,y,0,-.5,.12,.04);pink+=1.6*(blob(x,y,0,-.41,.14,.04)+blob(x,y,0,-.5,.12,.045)); // lips
+    d-=.03*blob(x,y,0,-.455,.13,.012);dark+=.5*blob(x,y,0,-.455,.13,.014); // where the lips meet
+    d+=.05*blob(x,y,0,-.72,.2,.12)+.03*blob(x,y,0,.45,.5,.3); // chin, forehead
+    d*=front;
+    d+=.05*sm(0,-.6,n.z)*sm(-.3,.3,y)-.05*sm(-.7,-.9,y)*sm(.5,.1,n.z); // back of the head; narrower under the jaw
+    p.setXYZ(i,n.x*(1+d),n.y*(1+d),n.z*(1+d));
+    pink=pink*front;dark=Math.min(.6,dark)*front;
+    pink=Math.min(1.6,pink);col.push((1-dark),(1-.2*pink)*(1-dark),(1-.17*pink)*(1-dark))}
+  geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));geo.computeVertexNormals();return geo})();
+const headSkin=skin.clone();headSkin.vertexColors=true;
+// doll eyes: white, a coloured iris, pupil and glint, painted where a sphere faces forward (u = 0.25, v = 0.5)
+const EYES=['#3f7fbf','#6b4423','#4f7f4a','#2e2b2a'].map(iris=>tex(256,128,(g,w,h)=>{g.fillStyle='#f6f2ee';g.fillRect(0,0,w,h);const cx=w*.25,cy=h/2;
+  const ig=g.createRadialGradient(cx,cy,3,cx,cy,21);ig.addColorStop(0,iris);ig.addColorStop(.75,iris);ig.addColorStop(1,'#1d1714');g.fillStyle=ig;g.beginPath();g.arc(cx,cy,21,0,7);g.fill();
+  for(let a=0;a<6.28;a+=.25){g.strokeStyle='rgba(255,255,255,.12)';g.beginPath();g.moveTo(cx+Math.cos(a)*9,cy+Math.sin(a)*9);g.lineTo(cx+Math.cos(a)*19,cy+Math.sin(a)*19);g.stroke()}
+  g.fillStyle='#0b0908';g.beginPath();g.arc(cx,cy,8.5,0,7);g.fill();g.fillStyle='#fff';g.beginPath();g.arc(cx-5,cy-6,3.2,0,7);g.fill()}));
+const eyeGeo=new THREE.SphereGeometry(.0125,28,18),lidGeo=new THREE.SphereGeometry(.0136,28,12,0,Math.PI*2,0,Math.PI/2),lowLidGeo=new THREE.SphereGeometry(.0134,28,8,0,Math.PI*2,Math.PI*.68,Math.PI*.32);
+const EYE_AT=[[-.0245,.0072,.054],[.0245,.0072,.054]]; // eyes[0] is the doll's left eye
+const LID={open:-.22,shut:1.45}; // upper lid turned back (open) or down over the eye (shut)
+const hairGeo=new THREE.SphereGeometry(1,48,20,0,Math.PI*2,0,Math.PI*.45);
 function dollVisual(){
   const g=new THREE.Group(),cloth=new THREE.MeshStandardMaterial({color:lin(R(ONESIES)),roughness:.95,map:R(KNITS)});
-  const head=new THREE.Group();head.add(mk(sph,skin,.071,.073,.069));
-  head.add(at(mk(sph,skin,.008,.006,.006),0,-.008,.07)); // button nose
-  for(const s of [-1,1]){const e=at(mk(sph,skin,.012,.02,.009),s*.07,0,-.004);e.rotation.y=s*.3;head.add(e)} // ears
-  const hair=at(mk(sph,R(hairMats),.073,.06,.072),0,.022,-.006);head.add(hair);
-  const curl=at(mk(sph,hair.material,.014,.01,.02),0,.074,.028);curl.rotation.x=.6;head.add(curl);
-  const eyes=[],shine=[];
-  for(const s of [-1,1]){
-    const e=at(mk(sph,dark,.011,.013,.007),s*.026,.012,.063);head.add(e);eyes.push(e);
-    const hl=at(mk(sph,white,.003),s*.026+.004,.017,.07);head.add(hl);shine.push(hl); // highlight
-    const b=at(mk(sph,brow,.012,.0025,.004),s*.027,.032,.062);b.rotation.z=-s*.15;head.add(b);
-    head.add(at(mk(sph,blush,.014,.009,.005),s*.042,-.016,.062));
+  const head=new THREE.Group();head.add(mk(headGeo,headSkin,...HEAD_SCALE));
+  for(const s of [-1,1]){const e=at(mk(sph,skin,.011,.019,.008),s*.071,0,-.004);e.rotation.y=s*.3;head.add(e)} // ears
+  const hairMat=R(hairMats),hair=at(mk(hairGeo,hairMat,.0765,.078,.0752),0,.004,-.006);hair.rotation.x=-.35;head.add(hair); // a clean hairline above the forehead
+  const curl=at(mk(sph,hairMat,.013,.009,.018),0,.075,.03);curl.rotation.x=.6;head.add(curl);
+  const eyeMat=new THREE.MeshPhysicalMaterial({map:R(EYES),roughness:.15,clearcoat:1,clearcoatRoughness:.05});
+  const eyes=[],lids=[];
+  for(const [x,y,z] of EYE_AT){
+    const e=at(new THREE.Mesh(eyeGeo,eyeMat),x,y,z);head.add(e);eyes.push(e);
+    const lid=at(new THREE.Mesh(lidGeo,skin),x,y,z);lid.rotation.x=LID.open;head.add(lid);lids.push(lid);
+    head.add(at(new THREE.Mesh(lowLidGeo,skin),x,y,z));
   }
-  const mouth=at(mk(sph,lip,.011,.004,.006),0,-.03,.066);head.add(mouth);
+  const mouth=at(mk(sph,mouthMat,.011,.0015,.0025),0,-.034,.056);head.add(mouth); // opens when crying
   const chest=new THREE.Group();chest.add(mk(sph,cloth,.074,.072,.064));
+  const collar=new THREE.Mesh(new THREE.TorusGeometry(.034,.008,8,24),cloth);collar.position.y=.06;collar.rotation.x=Math.PI/2;chest.add(collar);
+  for(let k=0;k<3;k++)chest.add(at(mk(sph,white,.006,.006,.002),0,.03-k*.024,.064-k*.002)); // snaps
   const hips=new THREE.Group();hips.add(mk(sph,cloth,.071,.066,.061));
   const arms=[0,1].map(s=>{const a=new THREE.Group(),d=new THREE.Vector3(...ARMD[s]),len=d.length(),n=d.clone().normalize();
     const c=mk(armGeo,skin,1,len*.9,1);c.quaternion.setFromUnitVectors(UP,n);a.add(c);
-    const hand=mk(sph,skin,.027,.03,.021);hand.position.copy(n).multiplyScalar(len*.5);hand.quaternion.copy(c.quaternion);a.add(hand);
-    const thumb=mk(sph,skin,.011);thumb.position.copy(n).multiplyScalar(len*.38).add(new THREE.Vector3(0,0,.018));a.add(thumb);
+    const hand=new THREE.Group();hand.position.copy(n).multiplyScalar(len*.48);hand.quaternion.copy(c.quaternion);a.add(hand);
+    hand.add(mk(sph,skin,.024,.026,.017));
+    for(let f=0;f<4;f++)hand.add(at(mk(sph,skin,.0072,.009,.0072),(f-1.5)*.0105,.024-Math.abs(f-1.5)*.002,.004)); // fingers
+    hand.add(at(mk(sph,skin,.0085,.011,.0085),-s*0+(s?-1:1)*.019,.008,.011)); // thumb
     const sleeve=mk(sph,cloth,.03,.028,.03);sleeve.position.copy(n).multiplyScalar(-len*.45);a.add(sleeve);return a});
-  const feet=[0,1].map(()=>{const f=new THREE.Group();f.add(at(mk(sph,skin,.032,.03,.045),0,0,.012));return f});
+  const feet=[0,1].map(()=>{const f=new THREE.Group();f.add(at(mk(sph,skin,.031,.029,.044),0,0,.012));
+    for(let t=0;t<5;t++)f.add(at(mk(sph,skin,.0072-t*.0007),(t-2)*.0105,.004-Math.abs(t-2)*.002,.05-Math.abs(t-2)*.004)); // toes
+    return f});
   const legs=[0,1].map(()=>mk(legGeo,cloth,1,1,1));
   const neck=mk(cylU,skin,.03,1,.028),waist=mk(cylU,cloth,.056,1,.05);
   const parts=[head,chest,hips,...arms,...feet];parts.concat(legs,[neck,waist]).forEach(p=>g.add(p));scene.add(g);
-  return {g,parts,legs,neck,waist,eyes,shine,mouth,cloth};
+  return {g,parts,legs,neck,waist,eyes,lids,mouth,cloth,eyeMat};
 }
 const _p=new THREE.Vector3(),_q=new THREE.Quaternion(),_h=new THREE.Vector3(),_d=new THREE.Vector3();
 function drawLeg(leg,hip,foot){_d.copy(foot).sub(hip);const len=Math.max(.001,_d.length());leg.position.copy(hip).addScaledVector(_d,.5);leg.quaternion.setFromUnitVectors(UP,_d.divideScalar(len));leg.scale.y=len}
@@ -502,7 +540,7 @@ function spawnDoll(P,Q,vel,omega){
   d.springs=JOINTS.map(j=>({A:d.bodies[j.a],B:d.bodies[j.b],la:V3(j.far),lb:V3(sub3(add3(PART_DEF[j.a].pos,j.far),PART_DEF[j.b].pos)),k:j.k,c:j.c}));
   drawBodies(d);dolls.push(d);return d;
 }
-function clearDolls(){dolls.splice(0).forEach(d=>{d.cons.forEach(c=>world.removeConstraint(c));d.bodies.forEach(b=>world.remove(b));scene.remove(d.v.g);d.v.cloth.dispose()})}
+function clearDolls(){dolls.splice(0).forEach(d=>{d.cons.forEach(c=>world.removeConstraint(c));d.bodies.forEach(b=>world.remove(b));scene.remove(d.v.g);d.v.cloth.dispose();d.v.eyeMat.dispose()})}
 const _a=new CANNON.Vec3(),_b=new CANNON.Vec3();
 function applySpring(s){
   s.A.pointToWorldFrame(s.la,_a);s.B.pointToWorldFrame(s.lb,_b);
@@ -607,18 +645,45 @@ const sfx={
     n.buffer=buf;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=1800;const g=ac.createGain();g.gain.value=.35;n.connect(f).connect(g).connect(ac.destination);n.start(t)},
   score(p){if(!settings.sound||!ac)return;const t=ac.currentTime,notes=p===0?[220,180]:p===1?[523]:p===2?[523,659]:[523,659,784,1047];notes.forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type=p?'triangle':'sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+i*.09);g.gain.linearRampToValueAtTime(.18,t+i*.09+.02);g.gain.exponentialRampToValueAtTime(.0001,t+i*.09+.35);o.connect(g).connect(ac.destination);o.start(t+i*.09);o.stop(t+i*.09+.4)})}
 };
-function cry(d,strength){
-  d.cryCD=1.8;if(!settings.alive)return;d.crying=Math.max(d.crying,.6+strength*1.4);
-  if(!settings.sound||!ac)return;
-  const t=ac.currentTime,dur=.5+strength*.8,base=rand(380,500),o=ac.createOscillator(),lfo=ac.createOscillator(),lg=ac.createGain(),out=ac.createGain();
-  o.type='sawtooth';o.frequency.setValueAtTime(base*.75,t);o.frequency.linearRampToValueAtTime(base*1.25,t+.14);o.frequency.linearRampToValueAtTime(base*1.08,t+dur*.7);o.frequency.linearRampToValueAtTime(base*.68,t+dur);
-  lfo.frequency.value=rand(5.5,7.5);lg.gain.value=base*.05;lfo.connect(lg).connect(o.frequency);
-  const f1=ac.createBiquadFilter(),f2=ac.createBiquadFilter();f1.type=f2.type='bandpass';f1.Q.value=5;f2.Q.value=7;f1.frequency.setValueAtTime(450,t);f1.frequency.linearRampToValueAtTime(1050,t+.12);f2.frequency.setValueAtTime(1300,t);f2.frequency.linearRampToValueAtTime(1750,t+.12);
-  out.gain.setValueAtTime(0,t);out.gain.linearRampToValueAtTime(.32*strength+.08,t+.07);out.gain.setValueAtTime(.28*strength+.06,t+dur*.75);out.gain.linearRampToValueAtTime(0,t+dur);
-  o.connect(f1);o.connect(f2);f1.connect(out);f2.connect(out);out.connect(ac.destination);
-  o.start(t);lfo.start(t);o.stop(t+dur+.05);lfo.stop(t+dur+.05);const rec={o,lfo};crying.add(rec);o.onended=()=>crying.delete(rec);
+/* Crying (SPEC §10): every baby has its own voice (pitch, rasp, wobble), and each cry is one of several kinds,
+   chosen by how hard it was hit: wails, "wah-wah" bursts, gasping sobs, fussing, whimpers and screams. */
+const VOWEL={w:[350,800],u:[420,950],a:[950,1450],e:[620,1950],i:[420,2350]}; // two formant frequencies each
+const makeVoice=()=>({pitch:rand(330,560),rasp:rand(.04,.3),wobble:rand(4.5,8),depth:rand(.02,.06),bright:rand(.85,1.2)});
+const CRIES={
+  wail:  v=>[{dur:rand(1,1.6),p:[.8,1.25,1.15,1.05,.7],vw:'wae',vol:.3}],
+  wahs:  v=>Array.from({length:2+Math.floor(Math.random()*3)},()=>({dur:rand(.22,.34),gap:rand(.08,.16),p:[.9,1.2,.85],vw:'wau',vol:.24})),
+  sobs:  v=>[{gasp:.18},{dur:.12,p:[1.3,1.45],vw:'ii',vol:.18,gap:.06},{dur:.1,p:[1.25,1.4],vw:'ii',vol:.16,gap:.1},{dur:rand(.7,1),p:[1.1,1.2,.9,.6],vw:'wae',vol:.28}],
+  fussy: v=>Array.from({length:3},(_,k)=>({dur:.2,gap:.06,p:[1,.92+k*.03,1.05],vw:'ee',vol:.14})),
+  whimper:v=>[{dur:rand(.45,.7),p:[1,.85,.7],vw:'uu',vol:.09}],
+  scream:v=>[{gasp:.12},{dur:rand(1,1.3),p:[1.3,1.75,1.65,1.4,1],vw:'aaea',vol:.36,rasp:2}]
+};
+const cryKind=strength=>R(strength>=.9?['scream','wail','wail','sobs']:strength>=.5?['wail','wahs','sobs','fussy']:['whimper','fussy','whimper']);
+function ramp(param,vals,t,dur){vals.forEach((x,k)=>{const at=t+dur*k/Math.max(1,vals.length-1);k?param.linearRampToValueAtTime(x,at):param.setValueAtTime(x,at)})}
+let noiseBuf=null;
+function noise(){if(!noiseBuf){noiseBuf=ac.createBuffer(1,ac.sampleRate,ac.sampleRate);const c=noiseBuf.getChannelData(0);for(let i=0;i<c.length;i++)c[i]=Math.random()*2-1}const n=ac.createBufferSource();n.buffer=noiseBuf;n.loop=true;return n}
+// one breath of crying: the voice sliding through pitches and vowels, with rasp and wobble
+function voiceNote(v,t,n,rec){
+  const out=ac.createGain(),f1=ac.createBiquadFilter(),f2=ac.createBiquadFilter(),lfo=ac.createOscillator(),lg=ac.createGain(),src=[ac.createOscillator(),ac.createOscillator(),noise()],ng=ac.createGain(),vol=n.vol*(.9+Math.random()*.2);
+  src[0].type='sawtooth';src[1].type='square';src[1].detune.value=rand(-14,14);
+  for(const o of src.slice(0,2)){ramp(o.frequency,n.p.map(x=>x*v.pitch),t,n.dur);lg.connect(o.frequency);o.connect(f1);o.connect(f2)}
+  lfo.frequency.value=v.wobble;lg.gain.value=v.pitch*v.depth;lfo.connect(lg);
+  ng.gain.value=v.rasp*(n.rasp||1)*.5;src[2].connect(ng);ng.connect(f1);ng.connect(f2);
+  f1.type=f2.type='bandpass';f1.Q.value=6;f2.Q.value=8;const vw=[...n.vw];
+  ramp(f1.frequency,vw.map(c=>VOWEL[c][0]*v.bright),t,n.dur);ramp(f2.frequency,vw.map(c=>VOWEL[c][1]*v.bright),t,n.dur);
+  out.gain.setValueAtTime(0,t);out.gain.linearRampToValueAtTime(vol,t+.04);out.gain.setValueAtTime(vol*.85,t+n.dur*.8);out.gain.linearRampToValueAtTime(0,t+n.dur);
+  f1.connect(out);f2.connect(out);out.connect(ac.destination);
+  for(const o of [...src,lfo]){o.start(t);o.stop(t+n.dur+.05);rec.push(o)}
 }
-function hush(){crying.forEach(r=>{try{r.o.stop();r.lfo.stop()}catch(e){}});crying.clear();dolls.forEach(d=>d.crying=0)}
+function gasp(t,dur,rec){const n=noise(),f=ac.createBiquadFilter(),g=ac.createGain();f.type='bandpass';f.frequency.setValueAtTime(900,t);f.frequency.linearRampToValueAtTime(2600,t+dur);f.Q.value=1.5;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.08,t+dur*.8);g.gain.linearRampToValueAtTime(0,t+dur);n.connect(f).connect(g).connect(ac.destination);n.start(t);n.stop(t+dur+.02);rec.push(n)}
+function cry(d,strength,kind){
+  d.cryCD=1.8;if(!settings.alive)return;
+  if(!settings.sound||!ac){d.crying=Math.max(d.crying,.6+strength*1.4);return}
+  const v=d.voice||(d.voice=makeVoice()),rec=[];let t=ac.currentTime+.02;
+  for(const n of CRIES[kind||cryKind(strength)](v)){if(n.gasp){gasp(t,n.gasp,rec);t+=n.gasp+.02;continue}voiceNote(v,t,n,rec);t+=n.dur+(n.gap||0)}
+  d.crying=Math.max(d.crying,t-ac.currentTime);crying.add(rec);rec[0].onended=null;setTimeout(()=>crying.delete(rec),(t-ac.currentTime+.2)*1000);
+}
+function hush(){crying.forEach(rec=>rec.forEach(o=>{try{o.stop()}catch(e){}}));crying.clear();dolls.forEach(d=>d.crying=0)}
 
 /* ---------- game state ----------
    The rules (SPEC §6) are plain functions on S: they never touch three.js. */
@@ -763,11 +828,11 @@ addEventListener('keydown',e=>{
 
 /* ---------- loop ---------- */
 const clock=new THREE.Clock();
-function setEye(v,i,open){v.eyes[i].scale.y=.013*Math.max(.15,open);v.shine[i].visible=open>.5}
+function setEye(v,i,open){v.lids[i].rotation.x=LID.open+(LID.shut-LID.open)*(1-open)}
 function face(v,d,t){
-  if(!settings.alive){v.mouth.scale.y=.004;v.eyes.forEach((e,i)=>setEye(v,i,1));return}
-  const open=d.crying>0?.012+Math.abs(Math.sin(t*9))*.006:.004;v.mouth.scale.y+=(open-v.mouth.scale.y)*.3;
-  v.eyes.forEach((e,i)=>setEye(v,i,d.crying>0?0:d.blink?eyeOpen(d.blink,i):1));
+  if(!settings.alive){v.mouth.scale.y=.0015;v.eyes.forEach((e,i)=>setEye(v,i,1));return}
+  const open=d.crying>0?.0055+Math.abs(Math.sin(t*9))*.0025:.0015;v.mouth.scale.y+=(open-v.mouth.scale.y)*.3;v.mouth.position.z=.056+Math.min(1,(v.mouth.scale.y-.0015)/.003)*.0075; // comes forward past the lips as it opens
+  v.eyes.forEach((e,i)=>setEye(v,i,d.crying>0?.12:d.blink?eyeOpen(d.blink,i):1)); // eyes squeezed nearly shut while crying
 }
 /* The baby in your hand blinks now and then; sometimes it slowly shuts its left eye, then its right
    (SPEC §5, Living babies only). eyes[0] is the doll's left eye. */
