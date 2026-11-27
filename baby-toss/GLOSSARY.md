@@ -45,6 +45,11 @@ _Avoid_: Hold, throw type
 A baby whose every part is inside a can and below its rim. The only way a baby scores.
 _Avoid_: In, made it
 
+**Late in**:
+An earlier baby from the same turn that ends up fully in after it stopped, knocked in by a later toss or wriggling
+in by itself. It scores then, once.
+_Avoid_: Knock-in, wriggle-in
+
 ## Playing
 
 **Turn**:
