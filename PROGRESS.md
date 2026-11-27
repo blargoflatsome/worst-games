@@ -9,7 +9,7 @@ Current state only. Update at the end of every session.
 
 ## Tutorial
 - The root `README.md` is a tutorial on how Baby Toss was made, with a small working example game in
-  `tutorial/starter.html` (not published on the website). On `ccr-2b3b8f7f-hy09hk`, not merged.
+  `tutorial/starter.html` (not published on the website). Merged 2026-11-27.
 
 ## Baby Toss
 - **Playable:** https://claude.ai/artifact/5kRh1GF6sBmgAuCuHN92g6 (private; share from the page's Share menu).
