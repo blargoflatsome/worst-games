@@ -17,6 +17,7 @@ and Catacombs of Despair rules, keeping what fits a set of small browser games.
 | The game's terms | `<game>/GLOSSARY.md`, listed in `GLOSSARY-MAP.md` at the root |
 | What's happening now | `PROGRESS.md` at the root |
 | The website's home page (one card per game) | `index.html` at the root |
+| How the games are made (a tutorial) | `README.md` at the root, with `tutorial/starter.html` as its small example |
 | What Netlify publishes | `netlify.toml`: copies only the playable pages into `dist` |
 
 A game moves to several files (or a build step) only when one file gets too big to work in, and only with the

@@ -7,6 +7,10 @@ Current state only. Update at the end of every session.
   2026-11-27. **The user still needs to create the Netlify site** (Import from GitHub →
   `blargoflatsome/worst-games`, branch `main`, site name `worst-games`; `netlify.toml` has the build settings).
 
+## Tutorial
+- The root `README.md` is a tutorial on how Baby Toss was made, with a small working example game in
+  `tutorial/starter.html` (not published on the website). On `ccr-2b3b8f7f-hy09hk`, not merged.
+
 ## Baby Toss
 - **Playable:** https://claude.ai/artifact/5kRh1GF6sBmgAuCuHN92g6 (private; share from the page's Share menu).
 - **Built:** everything in the [SPEC](baby-toss/docs/SPEC.md): the yard and three wobbling cans, ragdoll babies,
@@ -23,6 +27,7 @@ Current state only. Update at the end of every session.
 - The user's own logo (from their Silhouette file, without the B) on the home screen, tall can and website,
   merged 2026-11-27.
 - Setup rules in the user's words; winner screen shows the name and "You are the #1 tosser!", merged 2026-11-27.
+- **Phase 1 is complete** (user, 2026-11-27).
 - **Phase 2 (later):** multiple and unlockable baby skins (SPEC §12).
 - **Next:** the user plays it and tunes the grips; the open questions (SPEC §13), including how long "the same
   moment" is.
