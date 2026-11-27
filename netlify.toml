@@ -1,0 +1,6 @@
+# worst-games.netlify.app, deployed from `main` (CODING_STANDARDS §11).
+# No build tools: the build copies only the playable pages into `dist`, so the docs and rules aren't served.
+# A new game adds one line to the copy below.
+[build]
+  command = "rm -rf dist && mkdir -p dist/baby-toss && cp index.html dist/ && cp baby-toss/index.html dist/baby-toss/"
+  publish = "dist"

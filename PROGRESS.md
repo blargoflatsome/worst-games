@@ -2,6 +2,12 @@
 
 Current state only. Update at the end of every session.
 
+## Website
+- **https://worst-games.netlify.app** (from `main`): a home page with a Play link to each game. Built on
+  `ccr-2b3b8f7f-hy09hk`, not merged. **The user still needs to create the Netlify site** (Import from GitHub →
+  `blargoflatsome/worst-games`, branch `main`, site name `worst-games`; `netlify.toml` has the build settings).
+- **Idea (not started):** a Raspberry Pi arcade cabinet with a 10" touch screen that runs the games offline.
+
 ## Baby Toss
 - **Playable:** https://claude.ai/artifact/5kRh1GF6sBmgAuCuHN92g6 (private; share from the page's Share menu).
 - **Built:** everything in the [SPEC](baby-toss/docs/SPEC.md): the yard and three wobbling cans, ragdoll babies,

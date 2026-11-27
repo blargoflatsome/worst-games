@@ -40,6 +40,7 @@ is the written version.
 - One self-contained web page, `baby-toss/index.html`: HTML, CSS and JavaScript in one file, no build step.
 - 3D drawing: three.js r128. Physics: cannon.js 0.6.2. Both loaded from cdnjs at those exact versions, so the
   page needs an internet connection.
+- Played on the website at https://worst-games.netlify.app/baby-toss/ (user, 2026-11-27).
 - Playable link: published as a private claude.ai Artifact
   (https://claude.ai/artifact/5kRh1GF6sBmgAuCuHN92g6), which the user can share. Code lives in the
   `blargoflatsome/worst-games` repo.
