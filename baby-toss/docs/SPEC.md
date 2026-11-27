@@ -197,8 +197,8 @@ is the written version.
   in "…" on the scoreboard (the full name shows as the current player), and the settings button keeps its size.
   (Claude's call) A banner names whose turn it is.
 - **Paused** (settings button): Living babies, Sound, Keep playing, Quit to setup.
-- **Game over:** the user's Worst Human medal (their sculpture, cut out of their photo) pops in above "<name> wins!"
-  (user, 2026-11-27), then the final scores, Play again (same players) and Change players. With reduce motion the
+- **Game over:** the user's Worst Human medal (their sculpture, cut out of their photo) pops in above the winner's name,
+  with "You are the #1 tosser!" under it (user, 2026-11-27), then the final scores, Play again (same players) and Change players. With reduce motion the
   medal just appears.
 
 ## 10. Sound (Claude's call)
