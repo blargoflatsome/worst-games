@@ -81,3 +81,9 @@ the end.
 - 2026-11-27: Phase 2 added to the spec: multiple baby skins, some unlockable (user).
 - 2026-11-27: On the home screen the logo's baby is drawn smaller and further from the bin, which reads better at
   logo size; the can keeps the logo as drawn, which the user liked. (user)
+- 2026-11-27: The winner screen shows the user's Worst Human medal, cut out of their photo as a 24 KB WebP inside the
+  page (so the game stays one file), and the user's throne stands empty left of the cans (user). The throne is
+  modelled from simple shapes, not the photo. Skull and flesh lumps use a smooth indexed sphere (the first try was
+  faceted), and the eye sockets are unlit black so they read as holes.
+- 2026-11-27: Fixed the turn banner squeezing long names into a narrow column: a box centred at left 50% only got
+  half the screen.

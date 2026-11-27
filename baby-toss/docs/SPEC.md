@@ -71,6 +71,10 @@ is the written version.
   and bottom and clamp handles on the sides, and "BABY TOSS" with the logo in black vinyl on the front. The orange
   "SPLAT!" on the real can is left off. (Claude's call: the font is Fraunces at its heaviest and softest, the
   closest free match to the can's lettering; the logo is Claude's tracing of the one on the can)
+- **The throne** (user, 2026-11-27, from a photo of the user's own): it stands just off to the left of the cans,
+  in front of the fence, empty. A heap of stone skulls, a red satin seat and tufted back in an arched wooden frame
+  with a spire, torn dark red drapes, and clawed, horned hands gripping the top corners. Babies bounce off it like a
+  solid box. (Claude's call: built from simple shapes, its place and size)
 - The back bucket is meant to be partly hidden: about a third of it is behind the tall can from the throwing spot.
 - The cans wobble a little when hit but never tip over. (user, 2026-11-27; may be revisited) In the game only the
   can's picture rocks; the can itself stays put, so a wobble never changes whether a baby is fully in. (Claude's call)
@@ -186,7 +190,9 @@ is the written version.
   in "…" on the scoreboard (the full name shows as the current player), and the settings button keeps its size.
   (Claude's call) A banner names whose turn it is.
 - **Paused** (settings button): Living babies, Sound, Keep playing, Quit to setup.
-- **Game over:** "<name> wins!", final scores, Play again (same players) and Change players.
+- **Game over:** the user's Worst Human medal (their sculpture, cut out of their photo) pops in above "<name> wins!"
+  (user, 2026-11-27), then the final scores, Play again (same players) and Change players. With reduce motion the
+  medal just appears.
 
 ## 10. Sound (Claude's call)
 - Thuds on grass, clangs on the metal can, softer thumps for the stuffed body, a short tune for points, fireworks
