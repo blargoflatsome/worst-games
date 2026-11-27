@@ -150,8 +150,9 @@ is the written version.
   at a third of the screen height (160 to 320 px). Pulling sideways aims the other way, gently (pull left to aim
   right), so the finger never covers the cans. Power sets the square of the speed, so each can gets about the same
   stretch of the pull. The throw uses where the finger was 0.08 s before it lifted, so letting go doesn't change
-  it. A ring marks where the pull started; pulling back to it cancels. While pulling, a short dotted arc and a power
-  bar show the start of the throw (not where it lands). (Claude's call: the numbers)
+  it. A ring marks where the pull started; pulling back to it cancels. While pulling, a dashed line on the grass
+  points where the throw heads (a fixed length, so it never shows where the baby lands), and a power bar shows the
+  power. (2026-11-27: replaced a dotted arc, which spread up the screen and hid how aiming worked) (Claude's call: the numbers)
 - **Keyboard:** 1 to 7 pick a grip, Left and Right aim, Up and Down set power, Space or Enter throws.
 - A hint explains swiping before the first throw of a game.
 

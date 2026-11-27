@@ -53,3 +53,7 @@ the end.
   common one-gesture design, needs only a short pull and keeps the finger off the target; timed power meters are
   hard to hit on touch. Full power is now a third of the screen. If it doesn't feel good, a backswing and toss
   (slide down for power, flick up to throw) is next (SPEC §13).
+- 2026-11-27: The aim guide is now a dashed line on the grass pointing where the throw heads, plus the power bar.
+  The dotted arc it replaces spread up the screen near the camera, so the user couldn't tell how aiming worked and
+  thought pressing over a can should aim at it. The line has a fixed length, so it still never shows the landing
+  spot. (user asked for clearer aiming; Claude's design)

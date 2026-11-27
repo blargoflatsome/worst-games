@@ -392,13 +392,21 @@ function heldPose(pull,t){const Q=gripQ(grip,aim.yaw),H=new THREE.Vector3(...gri
 
 /* ---------- held doll and aim guide ---------- */
 const held=Object.assign(dollVisual(),{agit:.35,phase:0,crying:0});held.g.visible=false;
-const dots=[];for(let i=0;i<9;i++){const m=new THREE.Mesh(new THREE.SphereGeometry(.022,10,8),new THREE.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.9-i*.08}));m.visible=false;scene.add(m);dots.push(m)}
 const aim={yaw:0,power:0,active:false};
 // Power sets the square of the speed, so each step of power adds the same distance and the cans are spread
 // evenly along the swipe (SPEC §8).
 const SPEED_MIN=4.5,SPEED_MAX=9.9;
 function launchVel(yaw,pitch,mult){const sp=Math.sqrt(SPEED_MIN**2+aim.power*(SPEED_MAX**2-SPEED_MIN**2))*grip.speed*mult;return new THREE.Vector3(Math.sin(yaw)*Math.cos(pitch)*sp,Math.sin(pitch)*sp,-Math.cos(yaw)*Math.cos(pitch)*sp)}
-function showGuide(on){dots.forEach(d=>d.visible=on);$('#meter').hidden=!on;if(!on)return;const v=launchVel(aim.yaw,grip.pitch,1),H=new THREE.Vector3(...grip.hand);dots.forEach((d,i)=>{const t=(i+1)*.04;d.position.set(H.x+v.x*t,H.y+v.y*t-4.91*t*t,H.z+v.z*t)});$('#meter i').style.height=(aim.power*100).toFixed(0)+'%'}
+// The guide shows where the throw heads, never where it lands (SPEC §8): a fixed-length line on the grass.
+const GUIDE={lineFrom:.9,lineLen:7.6};
+const aimLine=new THREE.Group(),aimStrip=new THREE.Mesh(new THREE.PlaneGeometry(.045,GUIDE.lineLen),new THREE.MeshBasicMaterial({map:tex(8,64,(g,w,h)=>{g.fillStyle='#fff';g.fillRect(0,0,w,h*.55)},[1,GUIDE.lineLen*3]),transparent:true,opacity:.75,depthWrite:false}));
+aimStrip.rotation.x=-Math.PI/2;aimStrip.position.z=-(GUIDE.lineFrom+GUIDE.lineLen/2);aimLine.add(aimStrip);aimLine.visible=false;scene.add(aimLine);
+function showGuide(on){
+  aimLine.visible=on;$('#meter').hidden=!on;if(!on)return;
+  const H=grip.hand;
+  aimLine.position.set(H[0],.012,H[2]);aimLine.rotation.y=-aim.yaw;
+  $('#meter i').style.height=(aim.power*100).toFixed(0)+'%';
+}
 
 /* ---------- sound ---------- */
 let ac=null;const crying=new Set();
