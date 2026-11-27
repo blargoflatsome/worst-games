@@ -80,7 +80,9 @@ is the written version.
     matters to whether it stays in.
 - **Living babies** (setting, on by default): in the game the babies move and cry as if alive. They kick and flail,
   open their mouths and cry when they hit something hard, sometimes whimper while lying in the yard, and cry when
-  they land in a can. With it off they are only dolls: no movement of their own, no crying. (user; the details are
+  they land in a can. The baby in your hand blinks now and then, and sometimes slowly shuts its left eye and then its
+  right, in a creepy way. (user, 2026-11-27; tied to Living babies because blinking is acting alive: Claude's call)
+  With it off they are only dolls: no movement of their own, no crying. (user; the details are
   Claude's call)
 - **Looks** (Claude's call, made more realistic at the user's request 2026-11-27): glossy vinyl skin; knit onesies
   in a few pastel colours, plain, dotted or striped; painted eyes with a highlight, brows, a button nose, ears, rosy
@@ -112,7 +114,10 @@ is the written version.
   baby's points. (user, 2026-11-27)
 - If several babies score at the same moment, their points are added together before checking for a bust.
   (user, 2026-11-27) "The same moment" means babies that stop within 0.35 s of each other. (Claude's call)
-- A baby that goes over the fence scores 0 ("Over the fence!"), with no other penalty. (user, 2026-11-27)
+- A baby that goes over the fence scores 0 ("Over the fence!"), with no other penalty. (user, 2026-11-27) As it goes
+  over, a shower of fireworks goes off above the fence; the 0 PTS call follows when it stops, as before. (user,
+  2026-11-27; Claude's call: five rockets from behind the fence where it went over, one with reduce motion, with a
+  whistle and bang when Sound is on)
 - Each score shows a big call like the video: "2 PTS", "1 PT", "5 PTS", "0 PTS". (user)
 
 ### Exact target and bust
@@ -173,13 +178,15 @@ is the written version.
 - **Setup** (the first screen): name and tagline, a short version of the rules, players, Play to,
   Living babies, Sound, and Start tossing. The yard shows behind it with a few babies posed mid-game.
 - **Playing:** the current player, how many of their 3 babies are left, the scoreboard (every player's
-  score, the round, the target, and the can values), and a settings button. A banner names whose turn it is.
+  score, the round, the target, and the can values), and a settings button. On a narrow screen a long name ends
+  in "…" on the scoreboard (the full name shows as the current player), and the settings button keeps its size.
+  (Claude's call) A banner names whose turn it is.
 - **Paused** (settings button): Living babies, Sound, Keep playing, Quit to setup.
 - **Game over:** "<name> wins!", final scores, Play again (same players) and Change players.
 
 ## 10. Sound (Claude's call)
-- Thuds on grass, clangs on the metal can, softer thumps for the stuffed body, a short tune for points, and the
-  babies' cries (Living babies only). All made by the page; no sound files.
+- Thuds on grass, clangs on the metal can, softer thumps for the stuffed body, a short tune for points, fireworks
+  whistles and bangs, and the babies' cries (Living babies only). All made by the page; no sound files.
 - Sound has its own on/off setting, on by default.
 
 ## 11. Settings

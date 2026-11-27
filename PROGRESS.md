@@ -9,6 +9,7 @@ Current state only. Update at the end of every session.
   teams), Living babies and Sound settings. Merged to `main` 2026-11-27.
 - Throwing is pull back like a slingshot (SPEC §8), merged 2026-11-27.
 - More realistic yard, light, babies and cans, with automatic quality drop (SPEC §3–5), merged 2026-11-27.
+- Fireworks over the fence, blinking held baby, scoreboard fixed at 320 px, merged 2026-11-27.
 - **Next:** the user plays it and tunes the grips; the open questions (SPEC §13), including how long "the same
   moment" is.
 

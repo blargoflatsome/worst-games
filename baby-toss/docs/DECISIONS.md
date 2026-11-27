@@ -65,3 +65,10 @@ the end.
   by eye are now converted to linear, which fixed babies looking washed out. A frame slower than 0.5 s was first
   ignored as a tab switch, which would have stopped a very slow phone ever dropping detail; now only the first
   frame back from a hidden tab is ignored.
+- 2026-11-27: Over the fence sets off fireworks before the 0 PTS call (user). They burst low over the fence, at 2.9
+  to 4.4 m, so they show on a phone screen and in front of the trees; the first try burst too high and too soft to
+  see. Only the foot grips clear the fence at full power in the current tuning (open question 1, grip feel).
+- 2026-11-27: The held baby blinks, sometimes one eye then the other (user); tied to Living babies (Claude's call,
+  following SPEC §2: acting alive is what that setting turns off).
+- 2026-11-27: Scoreboard fixed at 320 px: the settings button was squeezed to 22 px and long names ran into the
+  scores. Long names now end in "…" there.

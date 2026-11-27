@@ -54,18 +54,20 @@ h1{margin:0;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em;c
 .soon{margin-top:12px;font-size:13px;color:var(--muted)}
 #hud{position:fixed;left:0;right:0;top:0;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;padding:10px max(16px,env(safe-area-inset-right,0px)) 0 max(16px,env(safe-area-inset-left,0px));padding-top:max(10px,env(safe-area-inset-top,0px));pointer-events:none}
 .pill{pointer-events:auto;background:var(--card);border-radius:16px;padding:8px 12px;box-shadow:0 4px 14px #1b2a1a26}
-#who{font-weight:900;font-size:18px;line-height:1.1}
+#hud>.pill{flex:0 1 auto;max-width:38%}
+#who{font-weight:900;font-size:18px;line-height:1.1;overflow-wrap:anywhere}
 #who small{display:block;font-size:13px;font-weight:800;color:var(--muted)}
 #babies{display:flex;gap:4px;margin-top:6px}
 #babies svg{width:22px;height:22px}
 #babies .used{opacity:.22}
-.right{display:flex;gap:8px;align-items:flex-start}
-#board{font-size:14px;font-weight:800;min-width:120px}
+.right{display:flex;gap:8px;align-items:flex-start;justify-content:flex-end;flex:1 1 auto;min-width:0}
+#board{font-size:14px;font-weight:800;min-width:0;flex:0 1 auto}
 #board .row{display:flex;justify-content:space-between;gap:12px;padding:2px 6px;border-radius:8px}
 #board .row.on{background:var(--lavbg)}
-#board .row span:last-child{font-variant-numeric:tabular-nums}
-#board .to{color:var(--muted);font-size:12px;padding:2px 6px 0;white-space:nowrap}
-#gear{width:44px;height:44px;border:0;display:grid;place-items:center;padding:0}
+#board .row span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#board .row span:last-child{font-variant-numeric:tabular-nums;flex:none}
+#board .to{color:var(--muted);font-size:12px;padding:2px 6px 0}
+#gear{flex:none;width:44px;height:44px;border:0;display:grid;place-items:center;padding:0}
 #grips{position:fixed;left:0;right:0;bottom:0;padding-bottom:max(10px,env(safe-area-inset-bottom,0px));text-align:center;pointer-events:none}
 #gripRow{display:flex;gap:6px;overflow-x:auto;padding:4px max(16px,env(safe-area-inset-left,0px));scrollbar-width:none;pointer-events:auto}
 #gripRow::before,#gripRow::after{content:"";margin:auto}
@@ -98,7 +100,6 @@ h1{margin:0;font-size:clamp(40px,7vw,58px);line-height:1;letter-spacing:-.01em;c
 #menu{align-items:flex-end}
 #menu .card{width:100%;max-height:78%;padding:18px}
 h1{font-size:40px}
-#board{min-width:100px}
 }
 @media (prefers-reduced-motion:reduce){#pop.show{animation:none;opacity:1}}
 </style>
@@ -412,10 +413,10 @@ function dollVisual(){
   for(const s of [-1,1]){const e=at(mk(sph,skin,.012,.02,.009),s*.07,0,-.004);e.rotation.y=s*.3;head.add(e)} // ears
   const hair=at(mk(sph,R(hairMats),.073,.06,.072),0,.022,-.006);head.add(hair);
   const curl=at(mk(sph,hair.material,.014,.01,.02),0,.074,.028);curl.rotation.x=.6;head.add(curl);
-  const eyes=[];
+  const eyes=[],shine=[];
   for(const s of [-1,1]){
     const e=at(mk(sph,dark,.011,.013,.007),s*.026,.012,.063);head.add(e);eyes.push(e);
-    head.add(at(mk(sph,white,.003),s*.026+.004,.017,.07)); // highlight
+    const hl=at(mk(sph,white,.003),s*.026+.004,.017,.07);head.add(hl);shine.push(hl); // highlight
     const b=at(mk(sph,brow,.012,.0025,.004),s*.027,.032,.062);b.rotation.z=-s*.15;head.add(b);
     head.add(at(mk(sph,blush,.014,.009,.005),s*.042,-.016,.062));
   }
@@ -431,7 +432,7 @@ function dollVisual(){
   const legs=[0,1].map(()=>mk(legGeo,cloth,1,1,1));
   const neck=mk(cylU,skin,.03,1,.028),waist=mk(cylU,cloth,.056,1,.05);
   const parts=[head,chest,hips,...arms,...feet];parts.concat(legs,[neck,waist]).forEach(p=>g.add(p));scene.add(g);
-  return {g,parts,legs,neck,waist,eyes,mouth,cloth};
+  return {g,parts,legs,neck,waist,eyes,shine,mouth,cloth};
 }
 const _p=new THREE.Vector3(),_q=new THREE.Quaternion(),_h=new THREE.Vector3(),_d=new THREE.Vector3();
 function drawLeg(leg,hip,foot){_d.copy(foot).sub(hip);const len=Math.max(.001,_d.length());leg.position.copy(hip).addScaledVector(_d,.5);leg.quaternion.setFromUnitVectors(UP,_d.divideScalar(len));leg.scale.y=len}
@@ -524,6 +525,39 @@ function showGuide(on){
   $('#meter i').style.height=(aim.power*100).toFixed(0)+'%';
 }
 
+/* ---------- fireworks ----------
+   A baby tossed over the fence sets off a shower of fireworks above where it went over (SPEC §6); its call still
+   says 0 PTS. Rockets rise from behind the fence and burst; with reduce motion there is one burst. */
+const FW={max:1400,bursts:5,per:160,gap:[.2,.4],height:[2.9,4.4],speed:[2,3.6],life:[1.1,1.9],size:.2, // low enough to see on a phone, in front of the trees
+  colours:[[1,.1,.2],[1,.75,0],[.1,.55,1],[.3,1,.2],[1,.2,.9],[.7,.2,1]]};
+const fwGeo=new THREE.BufferGeometry(),fwPos=new Float32Array(FW.max*3),fwCol=new Float32Array(FW.max*3),fwA=new Float32Array(FW.max);
+fwGeo.setAttribute('position',new THREE.BufferAttribute(fwPos,3));fwGeo.setAttribute('color',new THREE.BufferAttribute(fwCol,3));fwGeo.setAttribute('alpha',new THREE.BufferAttribute(fwA,1));
+const fwMat=new THREE.ShaderMaterial({transparent:true,depthWrite:false,uniforms:{map:{value:tex(64,64,(g,w,h)=>{const rg=g.createRadialGradient(32,32,0,32,32,32);rg.addColorStop(0,'rgba(255,255,255,1)');rg.addColorStop(.4,'rgba(255,255,255,1)');rg.addColorStop(.6,'rgba(255,255,255,.35)');rg.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=rg;g.fillRect(0,0,w,h)})},scale:{value:600}},
+  vertexShader:'attribute vec3 color;attribute float alpha;varying vec3 vC;varying float vA;uniform float scale;void main(){vC=color;vA=alpha;vec4 mv=modelViewMatrix*vec4(position,1.);gl_PointSize=scale*'+FW.size.toFixed(2)+'/-mv.z;gl_Position=projectionMatrix*mv;}',
+  fragmentShader:'uniform sampler2D map;varying vec3 vC;varying float vA;void main(){vec4 t=texture2D(map,gl_PointCoord);gl_FragColor=vec4(vC,t.a*vA);}'});
+const fwPoints=new THREE.Points(fwGeo,fwMat);fwPoints.frustumCulled=false;scene.add(fwPoints);
+const sparks=[],rockets=[];
+function addSpark(p,v,c,life){if(sparks.length<FW.max)sparks.push({p:p.clone(),v,c,life,age:0})}
+function fireworks(x){
+  const n=matchMedia('(prefers-reduced-motion: reduce)').matches?1:FW.bursts;let t=0;
+  for(let i=0;i<n;i++){rockets.push({wait:t,p:new THREE.Vector3(x+rand(-1.8,1.8),1.2,FENCE_Z-rand(.6,2.2)),top:rand(...FW.height),c:R(FW.colours)});t+=rand(...FW.gap)}
+}
+function burst(r){
+  for(let i=0;i<FW.per;i++){const u=rand(-1,1),a=Math.random()*6.283,q=Math.sqrt(1-u*u),sp=rand(...FW.speed);addSpark(r.p,new THREE.Vector3(q*Math.cos(a)*sp,u*sp,q*Math.sin(a)*sp),Math.random()<.12?[1,1,.85]:r.c,rand(...FW.life))}
+  sfx.bang();
+}
+function fireworksTick(dt){
+  for(let i=rockets.length-1;i>=0;i--){const r=rockets[i];if(r.wait>0){r.wait-=dt;if(r.wait<=0)sfx.whistle();continue}
+    r.p.y+=9*dt;addSpark(r.p,new THREE.Vector3(rand(-.2,.2),-.5,rand(-.2,.2)),[1,.75,.4],.4);if(r.p.y>=r.top){burst(r);rockets.splice(i,1)}}
+  let n=0;
+  for(let i=sparks.length-1;i>=0;i--){const s=sparks[i];s.age+=dt;if(s.age>=s.life){sparks.splice(i,1);continue}
+    s.v.y-=2.2*dt;s.v.multiplyScalar(1-1.1*dt);s.p.addScaledVector(s.v,dt)}
+  for(const s of sparks){fwPos.set([s.p.x,s.p.y,s.p.z],n*3);fwCol.set(s.c,n*3);fwA[n]=Math.pow(1-s.age/s.life,1.5)*(Math.random()<.15?.4:1);n++} // the flicker is a twinkle, not a flash
+  fwGeo.setDrawRange(0,n);if(n){for(const k of ['position','color','alpha'])fwGeo.attributes[k].needsUpdate=true}
+  fwMat.uniforms.scale.value=renderer.domElement.height/(2*Math.tan(camera.fov*Math.PI/360));
+}
+function clearFireworks(){sparks.length=0;rockets.length=0;fwGeo.setDrawRange(0,0)}
+
 /* ---------- sound ---------- */
 let ac=null;const crying=new Set();
 function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(ac&&ac.state==='suspended')ac.resume().catch(()=>{});return ac}
@@ -531,6 +565,10 @@ const sfx={
   impact(mat,v,soft){if(!settings.sound||!ac)return;const t=ac.currentTime,vol=Math.min(.5,v*.06)*(soft?.45:1);
     if(mat===M.metal&&!soft){[523,1307,2140].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f*rand(.97,1.03);g.gain.setValueAtTime(vol/(i+1),t);g.gain.exponentialRampToValueAtTime(.0001,t+.6);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.6)})}
     else{const n=ac.createBufferSource(),buf=ac.createBuffer(1,ac.sampleRate*.12,ac.sampleRate),ch=buf.getChannelData(0);for(let i=0;i<ch.length;i++)ch[i]=(Math.random()*2-1)*(1-i/ch.length)**3;n.buffer=buf;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=soft?260:mat===M.plastic||mat===M.metal?1100:600;const g=ac.createGain();g.gain.value=vol*1.6;n.connect(f).connect(g).connect(ac.destination);n.start(t)}},
+  whistle(){if(!settings.sound||!ac)return;const t=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(rand(900,1200),t);o.frequency.exponentialRampToValueAtTime(rand(2200,2800),t+.5);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.05,t+.05);g.gain.exponentialRampToValueAtTime(.0001,t+.55);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.6)},
+  bang(){if(!settings.sound||!ac)return;const t=ac.currentTime,n=ac.createBufferSource(),buf=ac.createBuffer(1,ac.sampleRate*.9,ac.sampleRate),ch=buf.getChannelData(0);
+    for(let i=0;i<ch.length;i++){const k=i/ch.length;ch[i]=(Math.random()*2-1)*((1-k)**4+(Math.random()<.004*(1-k)?3:0)*.3)} // boom, then crackle
+    n.buffer=buf;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=1800;const g=ac.createGain();g.gain.value=.35;n.connect(f).connect(g).connect(ac.destination);n.start(t)},
   score(p){if(!settings.sound||!ac)return;const t=ac.currentTime,notes=p===0?[220,180]:p===1?[523]:p===2?[523,659]:[523,659,784,1047];notes.forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.type=p?'triangle':'sine';o.frequency.value=f;g.gain.setValueAtTime(0,t+i*.09);g.gain.linearRampToValueAtTime(.18,t+i*.09+.02);g.gain.exponentialRampToValueAtTime(.0001,t+i*.09+.35);o.connect(g).connect(ac.destination);o.start(t+i*.09);o.stop(t+i*.09+.4)})}
 };
 function cry(d,strength){
@@ -603,6 +641,7 @@ function watchYard(dt){
     d.still=coreSpeed(d)<.15?d.still+dt:0;
     if(d.state==='flying'){
       const b=d.bodies[1].position;
+      if(!d.fence&&b.z<FENCE_Z-.15){d.fence=true;fireworks(b.x)}
       if(b.y<-2||Math.abs(b.x)>16||b.z<-25){d.state='gone';land(d,0)}
       else if(d.still>STOPPED||d.age>10){const over=b.z<FENCE_Z-.2,c=over?null:canFor(d);d.state=over?'gone':c?'in':'out';land(d,c?c.pts:0,c,{over})}
     }else if(d.state==='out'&&d.still>STOPPED){const c=canFor(d);if(c){d.state='in';land(d,c.pts,c,{late:true})}}
@@ -688,10 +727,25 @@ addEventListener('keydown',e=>{
 
 /* ---------- loop ---------- */
 const clock=new THREE.Clock();
+function setEye(v,i,open){v.eyes[i].scale.y=.013*Math.max(.15,open);v.shine[i].visible=open>.5}
 function face(v,d,t){
-  if(!settings.alive){v.mouth.scale.y=.004;v.eyes.forEach(e=>e.scale.y=.013);return}
+  if(!settings.alive){v.mouth.scale.y=.004;v.eyes.forEach((e,i)=>setEye(v,i,1));return}
   const open=d.crying>0?.012+Math.abs(Math.sin(t*9))*.006:.004;v.mouth.scale.y+=(open-v.mouth.scale.y)*.3;
-  v.eyes.forEach(e=>e.scale.y=d.crying>0?.003:.013);
+  v.eyes.forEach((e,i)=>setEye(v,i,d.crying>0?0:d.blink?eyeOpen(d.blink,i):1));
+}
+/* The baby in your hand blinks now and then; sometimes it slowly shuts its left eye, then its right
+   (SPEC §5, Living babies only). eyes[0] is the doll's left eye. */
+const BLINK={gap:[2,5.5],shut:.14,oneEyeChance:.35,oneEye:.55,lag:.4};
+held.blink={next:rand(...BLINK.gap),t:-1,oneEye:false};
+function blinkTick(b,dt){
+  if(b.t<0){b.next-=dt;if(b.next<=0){b.t=0;b.oneEye=Math.random()<BLINK.oneEyeChance}return}
+  b.t+=dt;if(b.t>(b.oneEye?BLINK.lag+BLINK.oneEye:BLINK.shut)){b.t=-1;b.next=rand(...BLINK.gap)}
+}
+function eyeOpen(b,i){
+  if(b.t<0)return 1;
+  if(!b.oneEye){const k=b.t/BLINK.shut;return Math.min(1,Math.abs(1-2*k))}
+  const k=(b.t-i*BLINK.lag)/BLINK.oneEye;if(k<0||k>1)return 1;
+  return k<.3?1-k/.3:k<.7?0:(k-.7)/.3; // a slow shut, a hold, a slow open
 }
 function lifeTick(d,dt){
   d.cryCD-=dt;d.crying=Math.max(0,d.crying-dt);d.agit=Math.max(.12,d.agit-dt*.25);
@@ -702,8 +756,8 @@ function frame(){
   if(!S.paused){
     world.step(1/240,dt,14);
     for(const d of dolls){d.age+=dt;lifeTick(d,dt);drawBodies(d);face(d.v,d,t)}
-    if(held.g.visible){const pull=aim.active?aim.power:0,{P,Q}=heldPose(pull,t);if(settings.alive){const w=new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(t*5)*.05,0,Math.sin(t*3.3)*.06));Q.multiply(w)}drawPose(held,P,Q);face(held,held,t)}
-    rockCans(dt);
+    if(held.g.visible){const pull=aim.active?aim.power:0,{P,Q}=heldPose(pull,t);if(settings.alive){const w=new THREE.Quaternion().setFromEuler(new THREE.Euler(Math.sin(t*5)*.05,0,Math.sin(t*3.3)*.06));Q.multiply(w)}drawPose(held,P,Q);blinkTick(held.blink,dt);face(held,held,t)}
+    rockCans(dt);fireworksTick(dt);
     if(['aim','flying','between','settling'].includes(S.phase))watchYard(dt);
     if(S.pending){S.pending.t-=dt;if(S.pending.t<=0)resolvePending()}
     // the turn's last baby: wait until it and everything it set moving stops (SPEC §6)
@@ -754,7 +808,7 @@ $('#setup').addEventListener('submit',e=>{
 });
 $('#gear').addEventListener('click',()=>{S.paused=true;$('#settings').hidden=false;$('#resume').focus()});
 $('#resume').addEventListener('click',()=>{S.paused=false;$('#settings').hidden=true;clock.getDelta()});
-function toMenu(){S.paused=false;S.phase='menu';S.pending=null;S.flying=null;clearDolls();hush();held.g.visible=false;showGuide(false);['#settings','#over','#hud','#grips','#hint','#banner','#pop','#pull'].forEach(s=>$(s).hidden=true);$('#menu').hidden=false;renderPlayers();posed()}
+function toMenu(){S.paused=false;S.phase='menu';S.pending=null;S.flying=null;clearDolls();clearFireworks();hush();held.g.visible=false;showGuide(false);['#settings','#over','#hud','#grips','#hint','#banner','#pop','#pull'].forEach(s=>$(s).hidden=true);$('#menu').hidden=false;renderPlayers();posed()}
 $('#quit').addEventListener('click',toMenu);$('#change').addEventListener('click',toMenu);
 $('#again').addEventListener('click',()=>{$('#over').hidden=true;startGame()});
 addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#settings').hidden)$('#resume').click()});
