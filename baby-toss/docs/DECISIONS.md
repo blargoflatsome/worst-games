@@ -123,3 +123,11 @@ the end.
   sound before. Measured centre about 600 Hz for a head hit, 390 Hz for the body (the ding was 844 Hz, pure tones).
 - 2026-11-27: Fixed grips out of reach with a mouse when the row doesn't fit (user): wheel scrolls the row, picking a
   grip scrolls it into view with room for the next, edges fade (following the modern-web-guidance tabs pattern).
+- 2026-11-27: A baby landed in the front can but scored 0 because a foot slid in a second after it stopped (user).
+  Cause: a baby is judged when its head and body have been still for half a second, while fully in needed every
+  part, so a limb still moving could miss the check. The user changed the rule: a baby counts if its **body is in**
+  (chest and belly inside and below the rim), whatever the head, arms and legs do. The scored parts are now parts
+  the stopped check watches, which also fixes the timing.
+- 2026-11-27: The feet looked like balloons (user): each was one 6 cm ball with beads for toes. Now a sculpted foot
+  (ankle, heel, flat sole, wider ball of the foot, big toe on the inside, about 7 cm by 4 cm) built from a
+  `FOOT_SHAPE` table. Looks only: the physics ball and the grips are unchanged.

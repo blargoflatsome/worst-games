@@ -74,7 +74,7 @@ is the written version.
   closest free match to the can's lettering; the logo is Claude's tracing of the one on the can)
 - The back bucket is meant to be partly hidden: about a third of it is behind the tall can from the throwing spot.
 - The cans wobble a little when hit but never tip over. (user, 2026-11-27; may be revisited) In the game only the
-  can's picture rocks; the can itself stays put, so a wobble never changes whether a baby is fully in. (Claude's call)
+  can's picture rocks; the can itself stays put, so a wobble never changes whether a baby's body is in. (Claude's call)
 
 ## 5. The babies
 - **Doll physics.** The babies are dolls about 39 cm long: a **stuffed, flexible body** with a **hard vinyl head,
@@ -93,7 +93,7 @@ is the written version.
   in a few pastel colours, plain, dotted or striped, with a collar and snaps; a sculpted head (chubby cheeks, button
   nose with nostrils, lips, chin) with rosy cheeks and lips; glassy doll eyes (blue, brown, green or dark) with eyelids
   that close for blinks and crying; an open mouth while crying; painted hair with a curl; chubby arms with fingers and a
-  thumb; toes on the feet (realism raised again at the user's request, 2026-11-27); a neck and waist that follow the ragdoll's
+  thumb; sculpted feet with an ankle, a round heel, a flat sole and toes that shrink from the big toe on the inside, not round balls (user, 2026-11-27: they looked like balloons); a neck and waist that follow the ragdoll's
   bends. Looks only: the physics shapes and sizes are unchanged.
 - **A different baby every toss** (user, 2026-11-27): each baby you pick up has a new look (onesie colour and pattern,
   hair, eyes), never the same onesie colour twice in a row, and the baby you throw is the one you were holding.
@@ -111,15 +111,17 @@ is the written version.
 - Players go in the order listed. (user, 2026-11-27)
 
 ### Scoring
-- A baby counts only if it is **fully in** a can: every part of it, head, hands and feet included, is inside the can
-  and below its rim. A baby resting on the rim, leaning on a can or sticking out scores nothing. (user)
-- A baby that stops moving **fully in** scores right away and keeps those points, even if a later baby knocks it
+- A baby counts if its **body is in** a can: its body is inside the can and below its rim, even if its head, arms or
+  legs stick out. (user, 2026-11-27; this replaced "fully in", where every part had to be in, after a foot that slid in
+  late cost a baby its points) "The body" is the stuffed chest and belly, and the whole of each is below the rim.
+  (Claude's call) A baby resting on the rim or leaning on a can scores nothing.
+- A baby that stops moving with its **body in** scores right away and keeps those points, even if a later baby knocks it
   out. (user, 2026-11-27)
-- A baby that stops anywhere else scores 0 for now, but can still be **late in**: if it ends up fully in later in
+- A baby that stops anywhere else scores 0 for now, but can still be **late in**: if its body ends up in a can later in
   the same turn, knocked in by a later baby or wriggling in by itself (Living babies), it scores the can's points
   then, once. This can happen at any time until the turn ends, including while the player waits to toss.
   (user, 2026-11-27)
-- A baby resting on another baby inside a can counts if it is fully in. A pile sticking out never takes back a
+- A baby resting on another baby inside a can counts if its body is in. A pile sticking out never takes back a
   baby's points. (user, 2026-11-27)
 - If several babies score at the same moment, their points are added together before checking for a bust.
   (user, 2026-11-27) "The same moment" means babies that stop within 0.35 s of each other. (Claude's call)
