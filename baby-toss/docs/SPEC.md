@@ -93,7 +93,7 @@ is the written version.
   in a few pastel colours, plain, dotted or striped, with a collar and snaps; a sculpted head (chubby cheeks, button
   nose with nostrils, lips, chin) with rosy cheeks and lips; glassy doll eyes (blue, brown, green or dark) with eyelids
   that close for blinks and crying; an open mouth while crying; painted hair with a curl; chubby arms with fingers and a
-  thumb; toes on the feet (realism raised again at the user's request, 2026-11-27); a neck and waist that follow the ragdoll's
+  thumb; sculpted feet with an ankle, a round heel, a flat sole and toes that shrink from the big toe on the inside, not round balls (user, 2026-11-27: they looked like balloons); a neck and waist that follow the ragdoll's
   bends. Looks only: the physics shapes and sizes are unchanged.
 - **A different baby every toss** (user, 2026-11-27): each baby you pick up has a new look (onesie colour and pattern,
   hair, eyes), never the same onesie colour twice in a row, and the baby you throw is the one you were holding.

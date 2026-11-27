@@ -446,6 +446,10 @@ const knit=kind=>tex(128,128,(g,w,h)=>{g.fillStyle='#f4f4f4';g.fillRect(0,0,w,h)
   for(let x=0;x<w;x+=4){g.fillStyle='rgba(0,0,0,.07)';g.fillRect(x,0,1,h)} // knit ribs
 },[3,3]);
 const KNITS=['plain','plain','dots','stripes'].map(knit);
+// Foot shape (doll frame, toes towards +z, x towards the other foot): [radius x, y, z, centre x, y, z] per piece,
+// and [radius, x, y, z] per toe, big toe first. About 7 cm long and 4 cm wide.
+const FOOT_SHAPE=[[.019,.021,.019,0,-.004,-.004],[.018,.016,.019,0,-.017,-.006],[.02,.012,.024,.001,-.021,.012],[.021,.012,.014,.002,-.021,.026]];
+const TOES=[[.0085,.012,-.025,.037],[.0066,.0045,-.026,.038],[.006,-.002,-.026,.036],[.0056,-.008,-.026,.033],[.0052,-.0135,-.026,.029]];
 const sph=new THREE.SphereGeometry(1,32,22),cylU=new THREE.CylinderGeometry(1,1,1,16),legGeo=new THREE.CylinderGeometry(.027,.036,1,16),armGeo=new THREE.CylinderGeometry(.019,.024,1,14);
 const UP=new THREE.Vector3(0,1,0);
 function mk(geo,mat,sx,sy,sz){const m=new THREE.Mesh(geo,mat);m.scale.set(sx,sy??sx,sz??sx);m.castShadow=true;return m}
@@ -511,8 +515,11 @@ function dollVisual(look=newLook()){
     for(let f=0;f<4;f++)hand.add(at(mk(sph,skin,.0072,.009,.0072),(f-1.5)*.0105,.024-Math.abs(f-1.5)*.002,.004)); // fingers
     hand.add(at(mk(sph,skin,.0085,.011,.0085),-s*0+(s?-1:1)*.019,.008,.011)); // thumb
     const sleeve=mk(sph,cloth,.03,.028,.03);sleeve.position.copy(n).multiplyScalar(-len*.45);a.add(sleeve);return a});
-  const feet=[0,1].map(()=>{const f=new THREE.Group();f.add(at(mk(sph,skin,.031,.029,.044),0,0,.012));
-    for(let t=0;t<5;t++)f.add(at(mk(sph,skin,.0072-t*.0007),(t-2)*.0105,.004-Math.abs(t-2)*.002,.05-Math.abs(t-2)*.004)); // toes
+  // a sculpted foot, not a ball: ankle under the leg's cuff, round heel, flat sole, a wider ball of the foot, and
+  // toes that shrink from the big toe on the inside; the sole sits at the bottom of the physics ball (FOOT_SHAPE)
+  const feet=[0,1].map(s=>{const f=new THREE.Group(),inX=s?-1:1;
+    for(const [rx,ry,rz,x,y,z] of FOOT_SHAPE)f.add(at(mk(sph,skin,rx,ry,rz),x*inX,y,z));
+    for(const [r,x,y,z] of TOES)f.add(at(mk(sph,skin,r,r*.85,r*1.1),x*inX,y,z));
     return f});
   const legs=[0,1].map(()=>mk(legGeo,cloth,1,1,1));
   const neck=mk(cylU,skin,.03,1,.028),waist=mk(cylU,cloth,.056,1,.05);

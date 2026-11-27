@@ -128,3 +128,6 @@ the end.
   part, so a limb still moving could miss the check. The user changed the rule: a baby counts if its **body is in**
   (chest and belly inside and below the rim), whatever the head, arms and legs do. The scored parts are now parts
   the stopped check watches, which also fixes the timing.
+- 2026-11-27: The feet looked like balloons (user): each was one 6 cm ball with beads for toes. Now a sculpted foot
+  (ankle, heel, flat sole, wider ball of the foot, big toe on the inside, about 7 cm by 4 cm) built from a
+  `FOOT_SHAPE` table. Looks only: the physics ball and the grips are unchanged.
