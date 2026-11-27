@@ -92,3 +92,5 @@ the end.
   tapering monster arms with talons hooked over the front corners, and skulls with brow, cheekbones and deep sockets.
 - 2026-11-27: Throne rebuilt again from the user's straight-on photo of it empty: one giant skull base (not a heap),
   a flat arched plywood board (not a pointed frame), a box cushion, six-button tufting, wing-like arms. (user)
+- 2026-11-27: The throne's skull looked sad and the little side skulls seemed to float (user): the side skulls are
+  gone, and the skull is now one sculpted surface, pushed in and out with darker hollows, brows low in the middle.

@@ -72,8 +72,8 @@ is the written version.
   "SPLAT!" on the real can is left off. (Claude's call: the font is Fraunces at its heaviest and softest, the
   closest free match to the can's lettering; the logo is Claude's tracing of the one on the can)
 - **The throne** (user, 2026-11-27, from a photo of the user's own): it stands just off to the left of the cans,
-  in front of the fence, empty. Matched to the user's photos: a giant sculpted skull as the base with little skulls
-  on its left, a red satin box cushion, a flat plywood board with an arched top holding a padded satin arch and a
+  in front of the fence, empty. Matched to the user's photos: a giant sculpted skull as the base (heavy brows over
+  deep angled sockets, a big nasal cavity, large teeth), a red satin box cushion, a flat plywood board with an arched top holding a padded satin arch and a
   coffin-shaped tufted panel with six buttons, a spike at the top right, black and dark red drapes behind, and
   monster arms spreading outward with talons hooked over the board's top corners. Babies bounce off it like a
   solid box. (Claude's call: built from simple shapes, its place and size)

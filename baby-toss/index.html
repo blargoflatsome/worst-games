@@ -398,8 +398,8 @@ function rockCans(dt){for(const c of CANS){for(const i of [0,1]){c.wv[i]+=(-196*
 CANS.forEach(buildCan);
 
 /* ---------- the throne ----------
-   The user's throne, empty, just left of the cans (SPEC §4), from their photos: a giant sculpted skull with little
-   skulls on its left, a red satin cushion, a flat plywood board with an arched top holding a tufted coffin of satin,
+   The user's throne, empty, just left of the cans (SPEC §4), from their photos: a giant sculpted skull, a red satin
+   cushion, a flat plywood board with an arched top holding a tufted coffin of satin,
    black and dark red drapes, and monster arms whose talons hook over the board's top corners.
    A solid box stands in for it in the physics, so babies bounce off. */
 const THRONE={x:-1.7,z:-8.1,turn:.21};
@@ -428,26 +428,35 @@ function throne(){
   const flesh=new THREE.MeshStandardMaterial({map:tiled(blotch('#7d7677',['#5a1212','#8c2020','#262020','#b0a8a8','#6d1717'],2000,[1,7]),2,4),roughness:.7});
   const ivory=new THREE.MeshStandardMaterial({color:lin(0xefe6cf),roughness:.4});
 
-  // the base: one giant sculpted skull, heavy brows over deep sockets, cheekbones, a nasal cavity and teeth
-  const S=new THREE.Group(),o={to:S};
-  put(lumpy(.5,.05),stone,0,.38,-.02,{...o,s:[1.14,.77,.8]});
-  for(const e of [-1,1]){
-    put(new THREE.SphereGeometry(1,28,18),socket,e*.21,.42,.29,{...o,s:[.15,.13,.11]});
-    put(lumpy(1,.15),stone,e*.22,.56,.3,{...o,s:[.22,.075,.12],r:[0,0,-e*.15]}); // brow
-    put(lumpy(1,.15),stone,e*.28,.26,.32,{...o,s:[.15,.08,.1],r:[0,0,e*.2]}); // cheekbone
-    put(lumpy(1,.2),stone,e*.46,.4,.18,{...o,s:[.09,.22,.12]}); // temple
-  }
-  put(new THREE.ConeGeometry(.08,.17,3),socket,0,.27,.36,{...o,s:[1,1,.5]});
-  put(lumpy(1,.15),stone,0,.11,.33,{...o,s:[.32,.08,.1]}); // upper jaw
-  for(let i=-3;i<=3;i++)put(new THREE.BoxGeometry(.05,.08,.03),stone,i*.06,.05,.38-Math.abs(i)*.012,o);
-  T.add(S);
-  // little skulls clustered on its left side and the cushion's corner
+  // the base: one giant skull sculpted as a single surface, pushed in for the sockets, nose and gaps between the
+  // teeth and out for the brows, cheekbones and teeth; the deeper a hollow, the darker it is (like a black wash)
+  {const geo=new THREE.SphereGeometry(.5,140,100),p=geo.attributes.position,col=[],n=new THREE.Vector3();
+    const sm=(a,b,x)=>{const t=Math.min(1,Math.max(0,(x-a)/(b-a)));return t*t*(3-2*t)};
+    const blob=(x,y,cx,cy,rx,ry,rot=0)=>{const dx=x-cx,dy=y-cy,c=Math.cos(rot),s2=Math.sin(rot),u=(dx*c+dy*s2)/rx,v=(-dx*s2+dy*c)/ry;return 1-sm(.55,1,Math.sqrt(u*u+v*v))};
+    for(let i=0;i<p.count;i++){n.fromBufferAttribute(p,i).normalize();const x=n.x,y=n.y,front=sm(.05,.45,n.z);let d=0;
+      for(const e of [-1,1]){
+        d-=.55*blob(x,y,e*.35,.12,.27,.18,e*.3); // sockets, angled with the inner corner low
+        d+=.11*blob(x,y,e*.33,.36,.34,.1,e*.3); // heavy brows, low in the middle
+        d+=.08*blob(x,y,e*.52,-.12,.18,.08,e*.28); // cheekbones rising outward
+        d-=.08*blob(x,y,e*.46,-.32,.16,.1); // gaunt hollows below them
+      }
+      const ny=(y+.14)/.2,hw=.16*(1-ny)*.9,nose=Math.abs(x)<hw&&ny>-1&&ny<1?sm(0,.35,1-Math.abs(x)/(hw+1e-4))*sm(-1,-.7,ny)*sm(1,.75,ny):0;
+      d-=.45*nose; // nasal cavity, wide at the bottom
+      d+=.06*blob(x,y,0,-.42,.45,.08); // upper jaw
+      const teeth=sm(-.78,-.7,y)*sm(-.5,-.57,y)*sm(.46,.4,Math.abs(x));
+      d+=teeth*(Math.sin(x*36)>-.5?.09:-.09); // teeth with dark gaps
+      d*=front;d+=.012*Math.sin(x*31+y*7)*Math.sin(y*23-n.z*11)+.01*Math.sin(x*13-n.z*17+y*5); // foam lumps everywhere
+      const r=.5*(1+d),jaw=1-.16*Math.max(0,-n.y);p.setXYZ(i,n.x*r*jaw,Math.max(-.44,Math.min(.5,n.y*r)),n.z*r); // narrower toward the jaw; // flat bottom on the grass, flat top under the cushion
+      const shade=Math.max(.04,1+4*Math.min(0,d));col.push(shade,shade,shade)}
+    geo.setAttribute('color',new THREE.Float32BufferAttribute(col,3));geo.computeVertexNormals();
+    const skullStone=stone.clone();skullStone.vertexColors=true;
+    put(geo,skullStone,0,.34,.02,{s:[1.18,.77,.8]})}
+  // little skulls, for the right claw
   function skull(sc,x,y,z,ry){const k=new THREE.Group(),q={to:k};
     put(lumpy(.3,.03),stone,0,.06,-.04,{...q,s:[.88,.9,1.08]});put(new THREE.SphereGeometry(.2,24,16),stone,0,-.1,.08,{...q,s:[1,.72,.9]});
     for(const e of [-1,1])put(new THREE.SphereGeometry(.085,20,14),socket,e*.092,-.035,.2,{...q,s:[1,1,.7]});
     put(new THREE.ConeGeometry(.04,.08,3),socket,0,-.15,.27,{...q,s:[1,1,.4],r:[0,0,Math.PI]});
     k.scale.setScalar(sc);k.position.set(x,y,z);k.rotation.y=ry;T.add(k)}
-  skull(.46,-.58,.22,.14,.7);skull(.4,-.64,.52,0,.8);skull(.32,-.5,.08,.36,.5);skull(.28,-.6,.76,-.08,.9);skull(.17,-.44,.94,.22,.4);
 
   // seat: a plain red satin box cushion right on the skull
   put(padded(rrect(.86,.48,.03),.06,.04),satin(),0,.78,.28,{r:[-Math.PI/2,0,0]});
