@@ -28,3 +28,11 @@ the end.
 - 2026-11-27: Project rules carried over from the user's other repos (My Brain, Catacombs of Despair): spec first,
   don't guess, decisions log, glossary, accessibility, reuse, modern web, branch per change. (user asked; Claude
   picked which rules fit)
+- 2026-11-27: Rule clarifications (user, in a grilling session). Teams removed to keep it simple: players go in the
+  order listed. A bust ends the turn, and so does reaching the target exactly. A baby that stops fully in keeps its
+  points even if knocked out later. A baby that stops anywhere else can still be **late in**, knocked in by a later
+  baby or wriggling in by itself, at any time until the turn ends (waiting is allowed); it scores then, once. Points
+  that land at the same moment are added together before the bust check. Stacked babies count if fully in. Over
+  the fence is just 0. Babies stay where they land until the turn ends. Cans wobble but never tip (may revisit).
+  1–12 players; target 1–500 in steps of 5. Replaces Claude's first version, where each baby was scored only once,
+  when it stopped.

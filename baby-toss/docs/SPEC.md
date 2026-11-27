@@ -32,7 +32,7 @@ is the written version.
    and cry like they're alive, and a setting turns that off. (user)
 3. **Plays anywhere.** A web page that works on a phone (iPhone Safari, Android Chrome) and a computer, with nothing
    to install. (Claude's call, agreed when the user approved the browser plan)
-4. **Multiplayer first.** Several players take turns on one device; teams are optional. (user)
+4. **Multiplayer first.** Several players take turns on one device. No teams. (user, 2026-11-27: teams removed)
 5. **Accessible.** WCAG 2.2 Level AA for everything outside the 3D yard: labels, keyboard use, visible focus,
    contrast, 44 px tap targets, works at 320 px wide. Throwing works with the keyboard as well as by swiping (§8).
 
@@ -43,7 +43,7 @@ is the written version.
 - Playable link: published as a private claude.ai Artifact
   (https://claude.ai/artifact/5kRh1GF6sBmgAuCuHN92g6), which the user can share. Code lives in the
   `blargoflatsome/worst-games` repo.
-- Nothing is sent anywhere. The device remembers only the settings (§11) and the last setup (players, teams,
+- Nothing is sent anywhere. The device remembers only the settings (§11) and the last setup (players and
   target).
 
 ## 4. The yard and the cans
@@ -58,6 +58,7 @@ is the written version.
 
 - The fence is about 9 m away and 1.9 m tall. A baby that goes over it scores 0 ("Over the fence!"). (Claude's call)
 - The back bucket is meant to be partly hidden: about a third of it is behind the tall can from the throwing spot.
+- The cans wobble a little when hit but never tip over. (user, 2026-11-27; may be revisited)
 
 ## 5. The babies
 - **Doll physics.** The babies are dolls about 39 cm long: a **stuffed, flexible body** with a **hard vinyl head,
@@ -72,41 +73,50 @@ is the written version.
   Claude's call)
 - **Looks** (Claude's call): footed onesies in a few pastel colours, painted eyes, rosy cheeks, a little hair.
 - Babies stay where they land for the rest of the turn, so later babies can hit them. The yard is cleared between
-  turns. (Claude's call)
+  turns. (user, 2026-11-27)
 
 ## 6. Rules
 ### Setup
-- Players type their names. Any number from 1 to 12 (one player is practice). (Claude's call)
-- **Teams are optional.** With teams on, there are two teams (Team Orange and Team Blue) and each player is put on
-  one. Each team needs at least one player. A team's score is shared. (user: teams optional; two teams, names and
-  sharing are Claude's call)
+- Players type their names. Any number from 1 to 12 (one player is practice). (user, 2026-11-27)
 - **Target score:** chosen at the start; **default 20**. (user) Allowed 1 to 500, with − and + buttons in steps of 5.
-  (Claude's call)
+  (user, 2026-11-27)
 
 ### Turns
 - Each player tosses **3 babies** a turn. (user)
-- Without teams, players go in the order listed. With teams, the teams alternate, and each team's players take
-  turns round by round. (Claude's call)
+- Players go in the order listed. (user, 2026-11-27)
 
 ### Scoring
 - A baby counts only if it is **fully in** a can: every part of it, head, hands and feet included, is inside the can
   and below its rim. A baby resting on the rim, leaning on a can or sticking out scores nothing. (user)
-- Each baby is scored once, when it stops moving, and shows a big score call like the video: "2 PTS", "1 PT",
-  "5 PTS", "0 PTS". (user: the look is from the video; when it's scored is Claude's call)
+- A baby that stops moving **fully in** scores right away and keeps those points, even if a later baby knocks it
+  out. (user, 2026-11-27)
+- A baby that stops anywhere else scores 0 for now, but can still be **late in**: if it ends up fully in later in
+  the same turn, knocked in by a later baby or wriggling in by itself (Living babies), it scores the can's points
+  then, once. This can happen at any time until the turn ends, including while the player waits to toss.
+  (user, 2026-11-27)
+- A baby resting on another baby inside a can counts if it is fully in. A pile sticking out never takes back a
+  baby's points. (user, 2026-11-27)
+- If several babies score at the same moment, their points are added together before checking for a bust.
+  (user, 2026-11-27)
+- A baby that goes over the fence scores 0 ("Over the fence!"), with no other penalty. (user, 2026-11-27)
+- Each score shows a big call like the video: "2 PTS", "1 PT", "5 PTS", "0 PTS". (user)
 
 ### Exact target and bust
-- A side must reach the target **exactly**. (user)
-- **Bust:** a baby that would take a side over the target busts. Their score goes back to what it was at the start
-  of that turn. (user) The turn ends there, and the call shows "BUST!" with "Back to <score>". (Claude's call: the
-  turn ends)
-- Reaching the target exactly ends that side's turn ("Right on 20!"). (Claude's call)
+- A player must reach the target **exactly**. (user)
+- **Bust:** a score that would take a player over the target busts. Their score goes back to what it was at the start
+  of that turn. (user) The turn ends there, and the call shows "BUST!" with "Back to <score>". (user, 2026-11-27:
+  the turn ends; Claude's call: the call's wording)
+- Reaching the target exactly ends that player's turn ("Right on 20!"). (user, 2026-11-27)
+- A late in counts the same way: it can bust or reach the target, and either ends the turn. (user, 2026-11-27)
+- The turn ends when its last baby (and everything it set moving) stops, or earlier on a bust or reaching the target.
+  (user, 2026-11-27)
 
 ### Rounds and winning
 - **Everyone gets the same number of turns:** a round always finishes, even after someone reaches the target. (user)
-- At the end of a round, if exactly one side is on the target, it wins. If none is, play goes on to the next round.
+- At the end of a round, if exactly one player is on the target, they win. If none is, play goes on to the next round.
   (user)
-- **Tiebreak:** if more than one side is on the target at the end of a round, those sides each take one tiebreak
-  turn of 3 babies. The most points in that turn wins; there is no target or bust in a tiebreak. If they're still
+- **Tiebreak:** if more than one player is on the target at the end of a round, those players each take one tiebreak
+  turn of 3 babies. The most points in that turn wins; there is no target or bust in a tiebreak. Late ins count as in any turn. If they're still
   tied, they take another tiebreak turn, until one leads. (user, 2026-11-27)
 
 ## 7. Grips
@@ -140,9 +150,9 @@ is the written version.
 - A hint explains swiping before the first throw of a game.
 
 ## 9. Screens
-- **Setup** (the first screen): name and tagline, a short version of the rules, the Teams switch, players, Play to,
+- **Setup** (the first screen): name and tagline, a short version of the rules, players, Play to,
   Living babies, Sound, and Start tossing. The yard shows behind it with a few babies posed mid-game.
-- **Playing:** the current player (and team), how many of their 3 babies are left, the scoreboard (every side's
+- **Playing:** the current player, how many of their 3 babies are left, the scoreboard (every player's
   score, the round, the target, and the can values), and a settings button. A banner names whose turn it is.
 - **Paused** (settings button): Living babies, Sound, Keep playing, Quit to setup.
 - **Game over:** "<name> wins!", final scores, Play again (same players) and Change players.
@@ -162,10 +172,6 @@ is the written version.
 - Online play, accounts, high-score lists, app store versions.
 
 ## 13. Open questions
-1. **Does a bust end the turn?** Built: yes, the rest of that turn's babies are lost.
-2. **Can a later baby change an earlier score?** Built: no. Each baby is scored when it stops, even if a later baby
-   knocks it out of a can (or into one).
-3. **Grip feel** (§7): the arc, power, spin and accuracy of each grip need the user to play and tune them.
-4. **Teams:** is two teams enough, and are Team Orange and Team Blue good names?
-5. **Can sizes and distances** (§4): these are guesses from the video. Does the user have real measurements?
-6. **Credit:** should the game show a credit for the user as its inventor (as My Brain does in its footer)?
+1. **Grip feel** (§7): the arc, power, spin and accuracy of each grip need the user to play and tune them.
+2. **Can sizes and distances** (§4): these are guesses from the video. Does the user have real measurements?
+3. **Credit:** should the game show a credit for the user as its inventor (as My Brain does in its footer)?
