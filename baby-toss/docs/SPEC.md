@@ -195,7 +195,8 @@ is the written version.
   medal just appears.
 
 ## 10. Sound (Claude's call)
-- Thuds on grass, clangs on the metal can, softer thumps for the stuffed body, a short tune for points, fireworks
+- Thuds on grass, a low "bong" on the metal can (many uneven ringing pitches from about 180 Hz, a short knock; duller
+  for the stuffed body, more clank for the vinyl head; the user found the first, a high ding, too cartoonish), softer thumps for the stuffed body, a short tune for points, fireworks
   whistles and bangs, and the babies' cries (Living babies only).
 - **Cries vary** (user, 2026-11-27): each baby has its own voice (pitch, breathiness, wobble), and each cry is one of
   a few kinds: a short startled "waah!" when tossed; a scream or a wail with a breath in between for a hard landing;

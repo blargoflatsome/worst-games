@@ -118,3 +118,6 @@ the end.
   landing thuds.
 - 2026-11-27: The cries' 1.4 s echo made them sound like they were in a tunnel (user). Replaced with a faint 0.3 s
   reflection mixed low: the tail after a cry went from 11 dB to 45 dB below the cry.
+- 2026-11-27: The metal can's high three-tone ding was too cartoonish (user). Now a low modal bong: 20 uneven ringing
+  pitches from 165-200 Hz up, higher ones dying faster, a short knock; also for the stuffed body, which had no metal
+  sound before. Measured centre about 600 Hz for a head hit, 390 Hz for the body (the ding was 844 Hz, pure tones).

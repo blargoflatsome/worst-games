@@ -639,9 +639,25 @@ function clearFireworks(){sparks.length=0;rockets.length=0;fwGeo.setDrawRange(0,
 /* ---------- sound ---------- */
 let ac=null;const crying=new Set();
 function audio(){if(!ac){try{ac=new (window.AudioContext||window.webkitAudioContext)()}catch(e){}}if(ac&&ac.state==='suspended')ac.resume().catch(()=>{});return ac}
+/* The galvanized can (SPEC §10): a big thin metal cylinder rings at many uneven, closely spaced pitches from about
+   180 Hz up, the higher ones dying away fastest, after a short knock. A hard vinyl head gives more clank; the stuffed
+   body a duller bong. Made sample by sample and heard through the yard like the cries. */
+const CAN_MODES=[1,1.04,1.47,1.53,1.98,2.43,2.51,2.9,3.6,4.4,4.6,5.2,6.3,6.6,7.5,9.1,10.8,12.9,15.2,18.1]; // dense upper modes give the sheet-metal clatter // pairs a few percent apart beat, like real sheet metal
+function canBong(vol,soft){
+  const K=kit(),now=ac.currentTime;if(K.lastBong!=null&&now-K.lastBong<.07&&soft)return;K.lastBong=now; // a doll settling in the can doesn't rattle off a burst of bongs
+  const rate=CRY_RATE,len=Math.floor(rate*(soft?.55:.9)),buf=ac.createBuffer(1,len,rate),x=buf.getChannelData(0),f0=rand(165,200),bright=soft?.6:1;
+  for(const r of CAN_MODES){const f=f0*r*rand(.97,1.03);if(f>rate*.45)continue;
+    const a=Math.pow(r,-.32)*(r>3?bright:1)*rand(.6,1.1),tau=(soft?.16:.32)*Math.pow(r,-.65),w=2*Math.PI*f/rate,ph=Math.random()*6.28;
+    for(let i=0;i<len;i++)x[i]+=a*Math.exp(-i/(tau*rate))*Math.sin(w*i+ph)}
+  const knock=Math.floor(rate*(soft?.012:.006));let lp=0; // the hit itself: a short burst, duller for the soft body
+  for(let i=0;i<knock*4;i++){lp+=((Math.random()*2-1)-lp)*(soft?.2:.6);x[i]+=lp*3*Math.exp(-i/knock)}
+  let pk=0;for(let i=0;i<len;i++)pk=Math.max(pk,Math.abs(x[i]));
+  const g=vol*(soft?.9:1.2)/(pk||1);for(let i=0;i<len;i++)x[i]*=g*Math.min(1,(len-i)/(rate*.05));
+  const src=ac.createBufferSource();src.buffer=buf;src.playbackRate.value=rand(.97,1.03);src.connect(kit().yard);src.start(now+.005);
+}
 const sfx={
   impact(mat,v,soft){if(!settings.sound||!ac)return;const t=ac.currentTime,vol=Math.min(.5,v*.06)*(soft?.45:1);
-    if(mat===M.metal&&!soft){[523,1307,2140].forEach((f,i)=>{const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f*rand(.97,1.03);g.gain.setValueAtTime(vol/(i+1),t);g.gain.exponentialRampToValueAtTime(.0001,t+.6);o.connect(g).connect(kit().master);o.start(t);o.stop(t+.6)})}
+    if(mat===M.metal){canBong(vol,soft);return}
     else{const n=ac.createBufferSource(),buf=ac.createBuffer(1,ac.sampleRate*.12,ac.sampleRate),ch=buf.getChannelData(0);for(let i=0;i<ch.length;i++)ch[i]=(Math.random()*2-1)*(1-i/ch.length)**3;n.buffer=buf;const f=ac.createBiquadFilter();f.type='lowpass';f.frequency.value=soft?260:mat===M.plastic||mat===M.metal?1100:600;const g=ac.createGain();g.gain.value=vol*1.6;n.connect(f).connect(g).connect(kit().master);n.start(t)}},
   whistle(){if(!settings.sound||!ac)return;const t=ac.currentTime,o=ac.createOscillator(),g=ac.createGain();o.frequency.setValueAtTime(rand(900,1200),t);o.frequency.exponentialRampToValueAtTime(rand(2200,2800),t+.5);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.05,t+.05);g.gain.exponentialRampToValueAtTime(.0001,t+.55);o.connect(g).connect(kit().master);o.start(t);o.stop(t+.6)},
   bang(){if(!settings.sound||!ac)return;const t=ac.currentTime,n=ac.createBufferSource(),buf=ac.createBuffer(1,ac.sampleRate*.9,ac.sampleRate),ch=buf.getChannelData(0);
