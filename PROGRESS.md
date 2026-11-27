@@ -2,6 +2,11 @@
 
 Current state only. Update at the end of every session.
 
+## Website
+- **https://worst-games.netlify.app** (from `main`): a home page with a Play link to each game. Merged
+  2026-11-27. **The user still needs to create the Netlify site** (Import from GitHub →
+  `blargoflatsome/worst-games`, branch `main`, site name `worst-games`; `netlify.toml` has the build settings).
+
 ## Baby Toss
 - **Playable:** https://claude.ai/artifact/5kRh1GF6sBmgAuCuHN92g6 (private; share from the page's Share menu).
 - **Built:** everything in the [SPEC](baby-toss/docs/SPEC.md): the yard and three wobbling cans, ragdoll babies,

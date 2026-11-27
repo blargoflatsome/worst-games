@@ -16,6 +16,8 @@ and Catacombs of Despair rules, keeping what fits a set of small browser games.
 | Decisions and changes of mind | `<game>/docs/DECISIONS.md` (newest at the bottom) |
 | The game's terms | `<game>/GLOSSARY.md`, listed in `GLOSSARY-MAP.md` at the root |
 | What's happening now | `PROGRESS.md` at the root |
+| The website's home page (one card per game) | `index.html` at the root |
+| What Netlify publishes | `netlify.toml`: copies only the playable pages into `dist` |
 
 A game moves to several files (or a build step) only when one file gets too big to work in, and only with the
 user's OK.
@@ -104,4 +106,8 @@ user's OK.
 - One branch and pull request per change; merge to `main` only when the user says to.
 - Commit messages: a short summary line, then what changed and why.
 - The spec, README and DECISIONS.md change in the same commit as the code.
+- The website, https://worst-games.netlify.app, deploys from `main` on Netlify (set up by the user: Import from
+  GitHub, site name `worst-games`; build settings come from `netlify.toml`). Every merge to `main` is a
+  production deploy, and the free plan allows about 20 a month, so batch changes and merge once per change.
+- A new game gets a card on the root `index.html` and a line in the `netlify.toml` copy command.
 - The playable Artifact link is republished from `<game>/index.html` when the user wants to try a change.

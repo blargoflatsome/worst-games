@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Worst Games</title>
+<meta name="description" content="Backyard games made into browser games.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Fraunces:opsz,wght,SOFT@144,900,100&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+/* The games' home page: the Baby Toss colours and type, one card per game. */
+:root{color-scheme:light;--ink:#241a33;--muted:#5d5470;--card:#ffffffee;--line:#e4dcef;--pink:#ff3d7f;--pinkd:#d81e62;--lav:#9b7bff;--sky:#9cc7ea;--grass:#5f9e3f}
+*{box-sizing:border-box;min-width:0}
+html{background:var(--sky)}
+body{margin:0;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;color:var(--ink);
+  font:16px/1.45 Nunito,system-ui,sans-serif;font-size-adjust:from-font;
+  background:linear-gradient(var(--sky) 0 60%,var(--grass) 60%);
+  padding:max(24px,env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) max(24px,env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+:focus-visible{outline:3px solid var(--lav);outline-offset:3px}
+main{width:min(720px,100%);margin:auto}
+h1{font:400 clamp(2.4rem,9vw,4.5rem)/1.05 "Alfa Slab One",Georgia,serif;margin:0 0 8px;text-align:center;color:var(--ink);text-shadow:0 3px 0 #fff}
+.lede{text-align:center;margin:0 0 28px;font-weight:800;font-size:1.15rem}
+.games{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));gap:16px}
+.card{background:var(--card);border-radius:22px;padding:22px;box-shadow:0 10px 30px #1b2a1a33}
+.card h2{font:900 2rem/1.1 Fraunces,Georgia,serif;font-variation-settings:"SOFT" 100;margin:0 0 4px}
+.tag{margin:0 0 16px;color:var(--muted);font-weight:800}
+/* the Baby Toss Start button, as a link */
+.go{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;padding:8px 16px;border-radius:16px;
+  background:var(--pink);color:#fff;font:400 22px/1.2 "Alfa Slab One",Georgia,serif;text-decoration:none;box-shadow:0 4px 0 var(--pinkd);
+  transition:background 150ms ease-out,scale 150ms ease-out}
+.go:hover{background:var(--pinkd)}
+.go:active{scale:.97}
+@media (prefers-reduced-motion:reduce){.go{transition:none}.go:active{scale:none}}
+</style>
+</head>
+<body>
+<main>
+  <h1>Worst Games</h1>
+  <p class="lede">Backyard games made into browser games.</p>
+  <ul class="games">
+    <li class="card">
+      <h2>Baby Toss</h2>
+      <p class="tag">Kid Tested, Mother Approved!</p>
+      <a class="go" href="baby-toss/">Play Baby Toss</a>
+    </li>
+  </ul>
+</main>
+</body>
+</html>
