@@ -71,7 +71,7 @@ is the written version.
 - **The tall can is the user's real one** (user, 2026-11-27, from a photo): galvanized, with ribs near the top
   and bottom and clamp handles on the sides, and "BABY TOSS" with the logo in black vinyl on the front. The orange
   "SPLAT!" on the real can is left off. (Claude's call: the font is Fraunces at its heaviest and softest, the
-  closest free match to the can's lettering; the logo is Claude's tracing of the one on the can)
+  closest free match to the can's lettering; the logo is the user's own, from their Silhouette cut file, without the B so the bin is solid (user, 2026-11-27))
 - The back bucket is meant to be partly hidden: about a third of it is behind the tall can from the throwing spot.
 - The cans wobble a little when hit but never tip over. (user, 2026-11-27; may be revisited) In the game only the
   can's picture rocks; the can itself stays put, so a wobble never changes whether a baby's body is in. (Claude's call)
