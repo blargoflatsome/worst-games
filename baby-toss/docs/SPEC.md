@@ -190,7 +190,7 @@ is the written version.
 - A hint explains swiping before the first throw of a game.
 
 ## 9. Screens
-- **Setup** (the first screen): the logo beside the name, in the can's lettering font (user, 2026-11-27), the tagline, a short version of the rules, players, Play to,
+- **Setup** (the first screen): the logo beside the name, in the can's lettering font (user, 2026-11-27), the tagline, a short version of the rules in the user's words (user, 2026-11-27), players, Play to,
   Living babies, Sound, and Start tossing. The yard shows behind it with a few babies posed mid-game.
 - **Playing:** the current player, how many of their 3 babies are left, the scoreboard (every player's
   score, the round, the target, and the can values), and a settings button. On a narrow screen a long name ends
