@@ -108,3 +108,11 @@ the end.
   tone through three vowel resonances (instead of sawtooth and square through narrow bandpass filters), baby pitch
   contours, less breath noise, a little distance and echo, and a limiter. Babies no longer cry while lying idle (the
   quiet wriggle stays); they give a short startled cry when tossed (user).
+- 2026-11-27: Cries rebuilt a third time; the user said they still clipped, hurt and didn't sound natural or far
+  away. Measured this time: the previous cries weren't clipping in the file but were heavily squashed (the browser's
+  compressor adds its own makeup gain) and loud, with most energy near 900 Hz, which phone speakers can't reproduce
+  well and overdrive on. Now each cry is synthesised sample by sample (vocal pulses with natural jitter and shimmer,
+  breath, three parallel baby formants), normalised to a modest peak, heard through a yard bus (220 Hz high-pass,
+  gentle 5.2 kHz low-pass, dark 1.4 s echo) and a soft limiter on all game sounds; no compressor. Measured result:
+  centred near 1.5 kHz like a real infant cry, peaks about 0.2, crest 6-11, nothing over the limit even mixed with
+  landing thuds.
