@@ -57,3 +57,4 @@ the end.
   The dotted arc it replaces spread up the screen near the camera, so the user couldn't tell how aiming worked and
   thought pressing over a can should aim at it. The line has a fixed length, so it still never shows the landing
   spot. (user asked for clearer aiming; Claude's design)
+- 2026-11-27: Pull back with the aim line on the grass feels good; the backswing-and-toss fallback is dropped. (user)

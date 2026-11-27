@@ -145,7 +145,7 @@ is the written version.
 - Each player's last grip is remembered for their next turn. (Claude's call)
 
 ## 8. Controls (Claude's call)
-- **Touch or mouse: pull back to throw**, like a slingshot. (user, 2026-11-27) Pick a grip from the row of buttons
+- **Touch or mouse: pull back to throw**, like a slingshot. (user, 2026-11-27: kept after trying it) Pick a grip from the row of buttons
   along the bottom, then press anywhere on the yard, pull down and let go. How far down sets the power: full power
   at a third of the screen height (160 to 320 px). Pulling sideways aims the other way, gently (pull left to aim
   right), so the finger never covers the cans. Power sets the square of the speed, so each can gets about the same
@@ -183,6 +183,4 @@ is the written version.
 2. **Can sizes and distances** (§4): these are guesses from the video. Does the user have real measurements?
 3. **Same moment** (§6): babies that stop within 0.35 s of each other score together. Should it be longer, for
    example everything one toss knocks in?
-4. **Throw gesture** (§8): if pulling back doesn't feel good, the next thing to try is a backswing and toss:
-   slide down to set the power, then flick up to throw, the flick's direction aiming. (user, 2026-11-27)
-5. **Credit:** should the game show a credit for the user as its inventor (as My Brain does in its footer)?
+4. **Credit:** should the game show a credit for the user as its inventor (as My Brain does in its footer)?
