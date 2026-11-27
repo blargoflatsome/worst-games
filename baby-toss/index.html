@@ -652,7 +652,7 @@ const sfx={
 /* Crying (SPEC §10). Each cry is made sample by sample like a small voice: vocal pulses that wander a little in
    timing and strength (a perfectly regular tone sounds buzzy and fake), soft breath, and the high resonances of a
    baby's small throat. Every cry is set to the same modest peak and heard from across the yard: the low rumble a
-   phone speaker can't play and the sharp top are trimmed, and a dark echo adds distance. A gentle limiter on all the
+   phone speaker can't play and the sharp top are trimmed, with only a faint quick reflection: a backyard is open air, not a room. A gentle limiter on all the
    game's sounds catches rare peaks. */
 const CRY_RATE=22050; // a cry has nothing above 5 kHz, so half the usual rate is plenty and twice as quick to make
 const CRY_PEAK=.38;
@@ -701,9 +701,9 @@ function kit(){let K=audioKit.get(ac);if(K)return K;
   lim.curve=curve;master.gain.value=.85;master.connect(lim);lim.connect(ac.destination);
   const yard=ac.createGain(),hp=ac.createBiquadFilter(),lp=ac.createBiquadFilter(),dry=ac.createGain(),wet=ac.createGain(),rev=ac.createConvolver(),pre=ac.createDelay(.1);
   hp.type='highpass';hp.frequency.value=220;lp.type='lowpass';lp.frequency.value=5200;lp.Q.value=.5; // distance is mostly echo and level; only a slight loss of top end
-  const len=Math.floor(ac.sampleRate*1.4),ir=ac.createBuffer(2,len,ac.sampleRate);
-  for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);let lpS=0;for(let i=0;i<len;i++){lpS+=(Math.random()*2-1-lpS)*.18;d[i]=lpS*Math.exp(-4.2*i/len)}} // a dark, soft echo
-  rev.buffer=ir;pre.delayTime.value=.03;dry.gain.value=.6;wet.gain.value=.5;
+  const len=Math.floor(ac.sampleRate*.3),ir=ac.createBuffer(2,len,ac.sampleRate);
+  for(let ch=0;ch<2;ch++){const d=ir.getChannelData(ch);let lpS=0;for(let i=0;i<len;i++){lpS+=(Math.random()*2-1-lpS)*.5;d[i]=lpS*Math.exp(-9*i/len)}} // open air: only a faint, quick reflection off the house
+  rev.buffer=ir;pre.delayTime.value=0;dry.gain.value=.95;wet.gain.value=.1;
   yard.connect(hp);hp.connect(lp);lp.connect(dry);lp.connect(pre);pre.connect(rev);rev.connect(wet);dry.connect(master);wet.connect(master);
   K={master,yard};audioKit.set(ac,K);return K}
 function cry(d,strength,kind){

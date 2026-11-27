@@ -116,3 +116,5 @@ the end.
   gentle 5.2 kHz low-pass, dark 1.4 s echo) and a soft limiter on all game sounds; no compressor. Measured result:
   centred near 1.5 kHz like a real infant cry, peaks about 0.2, crest 6-11, nothing over the limit even mixed with
   landing thuds.
+- 2026-11-27: The cries' 1.4 s echo made them sound like they were in a tunnel (user). Replaced with a faint 0.3 s
+  reflection mixed low: the tail after a cry went from 11 dB to 45 dB below the cry.

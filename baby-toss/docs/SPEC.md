@@ -201,7 +201,8 @@ is the written version.
   a few kinds: a short startled "waah!" when tossed; a scream or a wail with a breath in between for a hard landing;
   a wail, "wah-wah" bursts or hiccuping sobs on landing in a can. They should sound natural and like a baby across the
   yard, never harsh or close to a microphone: a voice that wavers slightly like a real one, a baby's bright vowels,
-  a modest level that leaves room for the other sounds, echo for distance, and a gentle limiter on all game sounds. (user asked for
+  a modest level that leaves room for the other sounds, no echo (a backyard is open air; the user found an echo
+  sounded like a tunnel), and a gentle limiter on all game sounds. (user asked for
   cleaner, more baby-like cries; Claude's call: how they're made) All made by the page; no sound files.
 - Sound has its own on/off setting, on by default.
 
