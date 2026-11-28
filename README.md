@@ -7,6 +7,9 @@ Play them at https://worst-games.netlify.app.
 The rest of this page is a tutorial: how Baby Toss was made, so you can change it or make your own game the same
 way. It assumes you can code (variables, functions, loops, objects) but have never made a game for the browser.
 
+**Tool for shapes:** the [three.js editor](https://threejs.org/editor/) runs in the browser. Build or import a
+model, adjust its shapes until it looks right, then export it as a glTF file and load it into your game.
+
 ---
 
 ## Contents
