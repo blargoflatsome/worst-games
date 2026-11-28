@@ -10,6 +10,11 @@ way. It assumes you can code (variables, functions, loops, objects) but have nev
 **Tool for shapes:** the [three.js editor](https://threejs.org/editor/) runs in the browser. Build or import a
 model, adjust its shapes until it looks right, then export it as a glTF file and load it into your game.
 
+**Tools for sounds:** the [ZzFX sound designer](https://killedbyapixel.github.io/ZzFX/) has sliders for pitch,
+noise and fade. When a sound is right, it gives you one short line of JavaScript to paste into your game.
+[jsfxr](https://sfxr.me/) makes retro game sounds like jumps, hits and coins, and has a random button for ideas.
+Both make their sounds with the Web Audio API, with no sound files.
+
 ---
 
 ## Contents
